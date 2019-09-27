@@ -2,20 +2,38 @@
 //
 
 #include "pch.h"
-#include <iostream>
-
-int main()
+//#include <iostream>
+#include <cstdlib>
+#include <cstdio>
+int appel(int & s)
 {
-    std::cout << "Hello World!\n"; 
+	s++;
+	return 0;
 }
 
-// Exécuter le programme : Ctrl+F5 ou menu Déboguer > Exécuter sans débogage
-// Déboguer le programme : F5 ou menu Déboguer > Démarrer le débogage
+Vec3 incrX(Vec3 _in) {
+	_in.x++;
+	return _in;
+}
+int main()
+{
+	  // Affichage string printf = debug.log uniquement en string
+    /*std::cout << "Hello World!\n"; 
+	int foo = 0;
+	const char * label = "sapin";
+	const char label2[6] = { 's','a','p','i','n',0 };
+	printf("hello world this is a test : %d label : %s %f\n",foo,label,66.66f);
+	printf("hello world : l2 : %s\n", label2);*/
 
-// Conseils pour bien démarrer : 
-//   1. Utilisez la fenêtre Explorateur de solutions pour ajouter des fichiers et les gérer.
-//   2. Utilisez la fenêtre Team Explorer pour vous connecter au contrôle de code source.
-//   3. Utilisez la fenêtre Sortie pour voir la sortie de la génération et d'autres messages.
-//   4. Utilisez la fenêtre Liste d'erreurs pour voir les erreurs.
-//   5. Accédez à Projet > Ajouter un nouvel élément pour créer des fichiers de code, ou à Projet > Ajouter un élément existant pour ajouter des fichiers de code existants au projet.
-//   6. Pour rouvrir ce projet plus tard, accédez à Fichier > Ouvrir > Projet et sélectionnez le fichier .sln.
+	  // affichage i via appel
+	/*int i = 66;
+	i++; //67
+	appel(i);*/
+
+	  // affichage de vecteur
+	Vec3 toto = { 1,2,3 }; //new Vec3()
+	incrX(toto);
+	printf(" xval: %f\n yval: %f\n zval: %f\n", toto.x, toto.y, toto.z);
+}
+
+
