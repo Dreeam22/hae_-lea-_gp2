@@ -36,6 +36,25 @@ int Strlen(const char * src) {
 }
 
 void Strcpy(char* dest, const char * src) {
+		//version gitan
+	/*for (int i = 0; *src ; ++i)
+	{
+		*dest = *src++;
+		*dest++;
+	}*/
+		//version ultra courte
+	/*for (int i = 0; src[i]; i++)
+		dest[i] = src[i];*/
+	
+		//version détaillée
+	int i = 0;
+	while (true) {
+		dest[i] = src[i];
+		if (src[i] == 0)
+			break;
+		i++;
+	}
+
 	//put copy in dest
 	return ;
 }
