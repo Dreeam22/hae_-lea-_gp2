@@ -72,7 +72,7 @@ int Min(int a, int b)
 	return (a < b ? a : b);
 }
 
-int Strcmp(char* meule, char* aiguille)
+int Strcmp(char* meule, char* aiguille)  
 {
 	int lenMeule = strlen(meule);
 	int lenAiguille = strlen(aiguille);
@@ -101,6 +101,7 @@ int Strcmp(char* meule, char* aiguille)
 	return -1;
 	
 }
+
 char* StrStr(char* meuleDeFoin, char* aiguille )
 {
 	int lenMeule = strlen(meuleDeFoin);
