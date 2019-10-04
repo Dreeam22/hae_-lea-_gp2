@@ -317,6 +317,43 @@ void ZeroMemory(char *dst, int size)
 	ZeroMemory(dst + 1, size-1);
 }
 
+void MemcpyRec(char* dst, const char * src, int size)
+{
+	if (size == 0) return;
+	else *dst = *src;
+
+	MemcpyRec(dst + 1 , src + 1, size -1);
+
+}
+
+int StrcmpRec(char* str0, char *str1) // renvoyer -1 0 1 selon l'ordre lexicographique
+{
+	if (*str0 == 0 && *str1 == 0) return 0;
+	if (*str0 == 0) return 1;
+	if (*str1 == 0) return -1;
+	if (*str0 < *str1) return 1;
+	if (*str0 > *str1) return -1;
+
+	return StrcmpRec(str0 + 1, str1 + 1);
+}
+
+void StrcatRec(char * str0, char* str1) //copier str1 à la fin de str0
+{
+	//chercher le \0 
+	//puis copier str1
+	return ;
+}
+
+char * StrChrRec(char* str, char tok )
+{
+	return 0;
+}
+
+char * StrStrRec(char * str0, char* str1) 
+{
+	return 0;
+}
+
 void TestRec()
 {
 	//int foo = add_rec(2, 2);
@@ -334,11 +371,29 @@ void TestRec()
 	char dst[150];
 	int foo10 = StrCpy_rec(dst,"pitiprout");
 
-	int szBuf = 32;
+	/*int szBuf = 32;
 	char * buffer = (char*)malloc(szBuf + 1);
 	buffer[32] = 'x';
 	ZeroMemory(buffer, szBuf);
-	printf("%c", buffer[32]);
+	printf("%c", buffer[32]);*/
 
-	int p = 0;
+	MemcpyRec(dst, "groprout", strlen(dst));
+	printf("%s", dst);
+
+	char toto[32];
+	char tata[32] = "it's me mariooo";
+	MemcpyRec(toto, tata, strlen(tata) + 1);
+	if (toto[0] != tata[0])
+		throw std::exception("hmm?");
+
+	char lapin[32] = "";
+	char lapin2[32] = "teprou";
+
+	if (StrcmpRec(lapin, lapin2) != 0)
+	{
+		throw std::exception("non");
+	}
+
+
+	int f = 0;
 }
