@@ -22,7 +22,7 @@ void Memcpy(char * dest, char * src, int size) {
 
 int StrChr(char* grange, char chat)
 {
-	int length = strlen(grange);
+	/*int length = strlen(grange);
 	for (int i = 0; i < length ; i++)
 	{
 		if (grange[i] == chat)
@@ -31,21 +31,31 @@ int StrChr(char* grange, char chat)
 		}	
 		
 	}
-	return -1;
+	return -1;*/
 
 	/*int i = 0;
-	while (strlen(grange))
+	while (grange[i]!= 0)
 	{
-		if (grange[i] == chat)
+		if (grange[i]==chat)
 		{
-			return i + 1;
+			return i;
 		}
+		i++;
+	}
+	return -1;*/
 
-		if (i == strlen(grange))
+	char* oldGrange = grange;
+	while (*grange)
+	{
+		if (*grange == chat)
 		{
-			return -1;
+			return(int)(grange - oldGrange);
 		}
-	}*/
+		grange++;
+
+	}
+	return -1;
+
 	/*trouver la position du chat
 		dans la grange
 		si pas trouvé
