@@ -7,9 +7,9 @@
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
+    //std::cout << "Hello World!\n"; 
 
-	printf("Tesuto : %d\n",IntArray::TEST);
+	//printf("Tesuto : %d\n",IntArray::TEST);
 
 	//auto montableau = new IntArray(16);
 	auto nameTab0 = "tab0";
@@ -27,16 +27,43 @@ int main()
 		tab1 = nullptr;
 	}
 	
-	
+	{
+		IntArray t(16);
+		t.set(0, 8);
+		t.set(3, 66);
+		for (int i = 0; i < t.getLenght(); i++) {
+			printf("t[%d]: %d\n", i, t[i]);
+		}
+
+		t[5] = 8;
+		printf("t[%d]: %d\n", 5, t[5]);
+	}
+
+	{
+		IntArray t(16);
+		for (int i = 0; i < 8; i++)
+		{
+			t.set(i, i*i);
+		}
+		t.push_back(5);
+		t.push_front(2);
+	}
+	{
+		IntArray t(0);
+		t.push_back(5);
+		t.push_front(2);
+	}
+
+	{
+		IntArray t(16);
+		for (int i = 0; i < 8; i++)
+		{
+			t.set(i, i*i);
+		}
+		t.insert(5, 2);
+
+		int i = 0;
+	}
 }
 
-// Exécuter le programme : Ctrl+F5 ou menu Déboguer > Exécuter sans débogage
-// Déboguer le programme : F5 ou menu Déboguer > Démarrer le débogage
 
-// Conseils pour bien démarrer : 
-//   1. Utilisez la fenêtre Explorateur de solutions pour ajouter des fichiers et les gérer.
-//   2. Utilisez la fenêtre Team Explorer pour vous connecter au contrôle de code source.
-//   3. Utilisez la fenêtre Sortie pour voir la sortie de la génération et d'autres messages.
-//   4. Utilisez la fenêtre Liste d'erreurs pour voir les erreurs.
-//   5. Accédez à Projet > Ajouter un nouvel élément pour créer des fichiers de code, ou à Projet > Ajouter un élément existant pour ajouter des fichiers de code existants au projet.
-//   6. Pour rouvrir ce projet plus tard, accédez à Fichier > Ouvrir > Projet et sélectionnez le fichier .sln.
