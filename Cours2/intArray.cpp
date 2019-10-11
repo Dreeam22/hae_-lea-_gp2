@@ -45,7 +45,7 @@ void IntArray::push_front(int elem) {
 }
 
 void IntArray::insert(int pos, int elem) {
-	(be_sure(currentSize + 1));
+	(be_sure(pos >= currentSize) ? (currentSize + 1) : (pos + 1));
 
 	for (int i = currentSize; i > pos; i--) {
 		data[i] = data[i - 1];
