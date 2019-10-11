@@ -5,7 +5,7 @@
 class IntArray {
 public :
 
-	const char * name = nullptr;
+	std::string name;
 	//membre TEST statique qui n'existe qu'à un seul endroit
 	static int TEST;
 	int * data; //tableau dynamique qui va contenir nos données
@@ -14,7 +14,7 @@ public :
 
 	IntArray(int size, const char * name = nullptr) {
 		this->name = name;
-		if (name) printf("construite \n",name);
+		printf("construite \n", this->name.c_str());
 
 			//version C old school
 		/*data = (int *)malloc(size * sizeof(int));
@@ -32,6 +32,6 @@ public :
 
 	~IntArray()
 	{
-		if(name)printf("détruite! \n", name);
+		printf("détruite! \n", name.c_str());
 	}
 };
