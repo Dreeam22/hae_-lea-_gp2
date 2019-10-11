@@ -165,8 +165,6 @@ int main()
 	printf("renvoi : %d\n", strcmp(licorne, blico));
 	printf("renvoi : %d\n", strcmp(licorne, licorne));*/
 
-	int a = 0;
-
 	TestRec();
 }
 
@@ -337,22 +335,68 @@ int StrcmpRec(char* str0, char *str1) // renvoyer -1 0 1 selon l'ordre lexicogra
 	return StrcmpRec(str0 + 1, str1 + 1);
 }
 
-void StrcatRec(char * str0, char* str1) //copier str1 à la fin de str0
+void StrcatRec(char * str0, char* str1) 
 {
+	//copier str1 à la fin de str0
 	//chercher le \0 
 	//puis copier str1
-	return ;
+	
+	if (*str0 == 0)
+	{
+		if (*str1 == 0)
+			return;
+		else {
+			*str0 = *str1;
+			*(str0 + 1) = 0;
+			StrcatRec(str0 + 1, str1 + 1);
+		}
+	
+	}
+	else
+		StrcatRec(str0 + 1, str1);
+
 }
 
 char * StrChrRec(char* str, char tok )
 {
-	return 0;
+	if (*str == 0) return nullptr;
+	if (*str == tok) return str;
+
+	StrChrRec(str + 1, tok);
+}
+
+bool StrStrBoolRec(char* str0, char* str1)
+{
+	if (*str1 == 0) return true;
+	if (*str0 == 0) return false;
+
+	if (*str0 == *str1)
+	{
+		StrStrBoolRec(str0 + 1, str1 + 1);
+	}
+	else return false;
 }
 
 char * StrStrRec(char * str0, char* str1) 
 {
-	return 0;
+	if (*str1 == 0) return nullptr;
+	if (*str0 == 0) return nullptr;
+
+	if (*str0 == *str1)
+	{		
+		if (StrStrBoolRec(str0, str1) == true)
+			return str0;
+	}
+
+	StrStrRec(str0 + 1, str1);
 }
+
+bool contains(const char * s0, const char *s1) {
+	int len = strlen(s0);
+	return s1 >= 0 && s1 <= s0 + len;
+}
+
+void assert(bool condition) { if (!condition) throw std::exception("non"); }
 
 void TestRec()
 {
@@ -377,23 +421,42 @@ void TestRec()
 	ZeroMemory(buffer, szBuf);
 	printf("%c", buffer[32]);*/
 
-	MemcpyRec(dst, "groprout", strlen(dst));
+	/*MemcpyRec(dst, "groprout", strlen(dst));
 	printf("%s", dst);
 
 	char toto[32];
 	char tata[32] = "it's me mariooo";
 	MemcpyRec(toto, tata, strlen(tata) + 1);
 	if (toto[0] != tata[0])
-		throw std::exception("hmm?");
+		throw std::exception("hmm?");*/
 
-	char lapin[32] = "";
+	char lapin[32] = "fly";
 	char lapin2[32] = "teprou";
 
-	if (StrcmpRec(lapin, lapin2) != 0)
+	/*if (StrcmpRec(lapin, lapin2) == 0)
 	{
 		throw std::exception("non");
-	}
+	}*/
 
+	//StrcatRec(lapin, lapin2);
 
-	int f = 0;
+	/*char chateau[32] = "chateau";
+	char soldat = 'e';
+	char* TokeninTxt = StrChrRec(chateau, soldat);
+	int pos1 = (int)(TokeninTxt - chateau);
+
+	printf("Le soldat est à la position %d\n", pos1); */
+
+	char text[1024] = "Lorem dipsum dolor sir amet";
+	char token[1024] = "dolor";
+
+	char* tokenInText = StrStr(text, token);
+	int pos = (int)(tokenInText - text);
+	printf("Le token est en position %d\n", pos);
+
+	if (contains(text, token) == true)
+		printf("oui");
+
+	int t = 0;
+
 }
