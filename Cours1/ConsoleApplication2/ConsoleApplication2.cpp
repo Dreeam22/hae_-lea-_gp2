@@ -365,6 +365,29 @@ char * StrChrRec(char* str, char tok )
 	StrChrRec(str + 1, tok);
 }
 
+bool startWith(const char* s0, const char * s1) {
+	if (*s0 == 0 && *s1 != 0) return false;
+
+	if (*s1 == 0) return false;
+
+	if (*s0 != *s1) return false;
+	else return startWith(s0 + 1, s1 + 1);
+}
+
+char * StrStrRec2(char * s0, char* s1)
+{
+	if (startWith(s0, s1))
+		return s0;
+	else return StrStrRec2(s0 + 1, s1);
+
+}
+
+char * StrStrRec3(char * s0, char* s1)
+{
+	return (startWith(s0, s1)) ? s0 : StrStrRec3(s0 + 1, s1);
+
+}
+
 bool StrStrBoolRec(char* str0, char* str1)
 {
 	if (*str1 == 0) return true;
