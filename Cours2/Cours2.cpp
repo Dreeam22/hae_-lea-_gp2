@@ -5,6 +5,8 @@
 #include <iostream>
 #include "intArray.hpp"
 
+void assert(bool condition) { if (!condition) throw std::exception("non"); }
+
 int main()
 {
     //std::cout << "Hello World!\n"; 
@@ -27,16 +29,16 @@ int main()
 		tab1 = nullptr;
 	}
 	
-	{
+	/*{
 		IntArray t(16);
 		t.set(0, 8);
 		t.set(3, 66);
 		for (int i = 0; i < t.getLenght(); i++) {
-			printf("t[%d]: %d\n", i, t[i]);
+			printf("t[%d]: %d\n", i, t.get(i));
 		}
 
-		t[5] = 8;
-		printf("t[%d]: %d\n", 5, t[5]);
+		t.set(5,8);
+		printf("t[%d]: %d\n", 5, t.get(5));
 	}
 
 	{
@@ -62,8 +64,28 @@ int main()
 		}
 		t.insert(5, 2);
 
+		
+	}*/
+
+	{
+		IntArray t(1);
+		t.set(0,5);
+		t.set(1,6);
+		t.set(2,10);
+
+		assert(t.SearchPosition(1) == 0);
+		assert(t.SearchPosition(5) == 0);
+		assert(t.SearchPosition(6) == 1);
+		assert(t.SearchPosition(8) == 2);
+
+		t.remove(6);
+
+		t.remove_all();
+
 		int i = 0;
 	}
+
+	
 }
 
 

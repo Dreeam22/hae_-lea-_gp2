@@ -42,21 +42,26 @@ public :
 		return currentSize;
 	}
 
-	inline int operator()(int pos) {
-		be_sure(pos);
+	int get(int pos) {
+		return data[pos];
+	}
+	
+	/*inline int operator()(int pos) {
+		be_sure(pos+1);
 		return data[pos];
 	}
 
 	inline int & operator[](int pos) {
-		be_sure(pos);
+		be_sure(pos+1);
 		return data[pos];
-	}
+	}*/
 	void set(int pos, int elem) {
 
-		(be_sure(pos));
-		
+		(be_sure(pos+1));		
 		data[pos] = elem;
-		currentSize = pos;
+		if (currentSize <= pos)
+			currentSize = pos + 1;
+		
 		
 		//s'assurer de la taille des données
 		//changer data
@@ -67,4 +72,41 @@ public :
 	void push_front(int elem);
 
 	void insert(int pos, int elem);
+
+	int SearchPosition(int elem)
+	{
+		for (int i = 0; i < currentSize; i++)
+		{
+			if (elem <= data[i])
+				return i;			
+		}
+		return getLenght();
+	}
+
+	void remove(int valeur) {
+		for (int i = 0; i < currentSize; i++) {
+			if (data[i] == valeur) {
+				for (int j = i; j < currentSize; j++)
+				{
+					data[j] = data[j+1];
+					//data[j]= (j+1<currentSize?data[j+1]:NULL); //sert à clean la suite du tableau
+				}
+				currentSize--;
+				break;
+
+			}
+		}
+	}
+
+	bool remove1(int valeur) {
+
+	}
+
+	void remove_all(){
+		for (int i = 0; i < currentSize; i++) {
+			data[i] = NULL;
+			
+		}
+		currentSize = 0;
+	}
 };
