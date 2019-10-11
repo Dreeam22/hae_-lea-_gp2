@@ -13,7 +13,7 @@ public :
 	int maxSize;
 	int currentSize = 0;
 
-	IntArray(int size, const char * name = "") {
+	IntArray(int size = 1, const char * name = "") {
 		this->name = name;
 		//printf("construite \n", this->name.c_str());
 
@@ -75,7 +75,7 @@ public :
 
 	int SearchPosition(int elem)
 	{
-		for (int i = 0; i < currentSize; i++)
+		for (int i = 0; i < getLenght(); i++)
 		{
 			if (elem <= data[i])
 				return i;			
@@ -98,15 +98,36 @@ public :
 		}
 	}
 
-	bool remove1(int valeur) {
-
-	}
-
 	void remove_all(){
 		for (int i = 0; i < currentSize; i++) {
 			data[i] = NULL;
 			
 		}
 		currentSize = 0;
+	}
+
+	void fillwithrandom(int nbElem) {
+		remove_all();
+		be_sure(nbElem);
+
+		for (int i = 0; i < nbElem; i++)
+		{
+			int val = std::rand() % 100;
+			set(i, val);
+		}
+	}
+
+	void sort(){
+		IntArray nuData(1,"corneille");
+		int z = getLenght();
+		for (int i = 0; i < z; i++) {
+			int val = get(i);
+			int pos = nuData.SearchPosition(val);
+			nuData.insert(pos, val);
+		}
+
+		for (int i = 0; i < getLenght(); i++) {
+			set(i, nuData.get(i));
+		}
 	}
 };

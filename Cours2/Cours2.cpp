@@ -79,10 +79,15 @@ int main()
 		assert(t.SearchPosition(8) == 2);
 
 		t.remove(6);
+	
+	}
 
-		t.remove_all();
+	{
+		IntArray t(1,"racine");
+		t.fillwithrandom(8);
+		t.sort();
 
-		int i = 0;
+		int pq = 0;
 	}
 
 	

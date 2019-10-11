@@ -4,25 +4,20 @@
 int IntArray::TEST = 66;
 
 bool IntArray::be_sure(int size) { //s'assure que le tableau fait au moins size
+	if (size < maxSize) return false;
+
 	int* newdata = new int[size];
 
-	for (int i = 0; i < size; i++) newdata[i] = 0;
+	for (int i = 0; i < size; ++i) newdata[i] = 0;
+	for (int i = 0; i < currentSize; i++)
+		newdata[i] = data[i];
 
-	if (size < maxSize) return false;
-	else
-	{
-		for (int i = 0; i < size; i++)
-		{
-			newdata[i] = data[i];
-		}
+	delete(data);
+	data = newdata;
 
-		delete(data);
-		data = newdata;
-
-		maxSize = size;
-		printf("on passe \n");
-		return true;
-	}
+	maxSize = size;
+	printf("regrow a %d\n",size);
+	return true;
 
 }
 
@@ -45,7 +40,7 @@ void IntArray::push_front(int elem) {
 }
 
 void IntArray::insert(int pos, int elem) {
-	(be_sure(pos >= currentSize) ? (pos + 1) : (currentSize + 1));
+	(be_sure((pos >= currentSize) ? (pos + 1) : (currentSize + 1)));
 
 	for (int i = currentSize; i > pos; i--) {
 		data[i] = data[i - 1];
