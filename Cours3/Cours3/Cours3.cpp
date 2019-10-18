@@ -67,7 +67,7 @@ int main()
 		IntArray tete;
 		tete.fillwithtruc(10);
 
-		tete.binarySearch(6);
+		int bpos = tete.binarySearch(6);
 
 
 		int p = 0;

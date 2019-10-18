@@ -114,26 +114,27 @@ public :
 	}
 
 	int _binarySearch(int key, int start, int end)
-	{
-		int pivot = (start + end) / 2;
+	{		
 		//trouver le pivot
 		//est ce qu'on part à gauche ?
 		//est ce qu'on part à droite ?
 		//demander le sous résultat
-		if (start >= end) return 0;
+		if (start >= end) return start;
+		
+		if (end == start + 1) {
+			if (key > data[start]) return end;
+			if (key < data[end]) return start;
+			return start;
+		}
+		int pivot = (start + end) / 2;
 		if (key == data[pivot]) return pivot;
 		
-		if (data[pivot] > key)//va à gauche 
+		if (key < data[pivot])//va à gauche 
 		{
-			return _binarySearch(key, start, pivot - 1);
+			return _binarySearch(key, start, pivot);
 		} 	
+		else return _binarySearch(key, pivot, end);
 		
-		if (data[pivot] < key)
-		{
-			return _binarySearch(key, pivot + 1, end);
-		}
 		
-
-
 	}
 };
