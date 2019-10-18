@@ -6,22 +6,83 @@
 #include "intArray.hpp"
 #include "Util.hpp"
 #include "List.hpp"
-
+#include "Tri.hpp"
 
 void assert(bool condition) { if (!condition) throw std::exception("non"); }
 
-void testIntList() {
-	IntList * variable = new IntList(8);
 
-	//faire tests
+void TestIntTree() {
 
+	
+	IntTree * tree = new IntTree();
+	Node<int> * leaf = new IntNode(8);
+	tree->root = leaf;
+	leaf->insert(4);
+	//assert(leaf->left->elem == 4);
+
+	leaf->insert(9);
+	//assert(leaf->right->elem == 9);
+
+	leaf->insert(16);
+	leaf->insert(3);
+	leaf->insert(5);
+	assert(leaf->getLength() == 6);
+
+
+	assert(leaf->Contains(16) == true);
+	leaf->remove(16);
+	assert(leaf->Contains(16) == false);
+	assert(leaf->Contains(4) == true);
+	leaf->remove(4);
+	assert(leaf->Contains(4) == false);
+	leaf->insert(0);
+	assert(leaf->Contains(0) == true);
+	leaf->remove(0);
+	assert(leaf->Contains(0) == false);
+
+
+
+	tree->dfsprint();
+	int k = 0;
+}
+
+
+
+void testIntlist() {
+	IntList * toto = new IntList(8);
+
+	toto->Append(65);
+	assert(toto->Length() == 2);
+
+	toto = toto->addFirst(33);
+	assert(toto->Length() == 3);
+	assert(toto->elem == 33);
+
+	toto = toto->Remove(12);
+	assert(toto->Length() == 3);
+	toto = toto->Remove(33);
+	assert(toto->Length() == 2);
+
+
+	toto = toto->addFirst(70);
+	toto = toto->Remove(70);
+	IntList * tata = new IntList(66);
+	tata = tata->Remove(66);
+	assert(tata == nullptr);
+
+
+
+	/*bool MRP = toto->Contains(60);
+	assert(MRP == false);
+	bool MRP2 = toto->Contains(65);
+	assert(MRP2 == true);*/
 	int k = 0;
 }
 
 int main()
 {
-
-	testIntList();
+	TestIntTree();
+	testIntlist();
 	/*{
 		IntArray t(1);
 		t.fillwithrandom(16);
