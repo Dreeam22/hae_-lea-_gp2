@@ -83,51 +83,57 @@ public :
 		return getLenght();
 	}
 
-	void remove(int valeur) {
-		for (int i = 0; i < currentSize; i++) {
-			if (data[i] == valeur) {
-				for (int j = i; j < currentSize; j++)
-				{
-					data[j] = data[j+1];
-					//data[j]= (j+1<currentSize?data[j+1]:NULL); //sert à clean la suite du tableau
-				}
-				currentSize--;
-				break;
+	void remove(int valeur);
 
-			}
-		}
-	}
+	void remove_all();
 
-	void remove_all(){
-		for (int i = 0; i < currentSize; i++) {
-			data[i] = NULL;
-			
-		}
-		currentSize = 0;
-	}
+	void fillwithrandom(int nbElem);
 
-	void fillwithrandom(int nbElem) {
+	void sort();
+
+	void permuter(int pos0, int pos1);
+
+	void triInser();
+
+	void fillwithtruc(int nbElem) {
 		remove_all();
-		be_sure(nbElem);
-
+		int val = 0;
 		for (int i = 0; i < nbElem; i++)
 		{
-			int val = std::rand() % 100;
-			set(i, val);
+			val++;			
+			set(i,val);
+
 		}
 	}
 
-	void sort(){
-		IntArray nuData(1,"corneille");
-		int z = getLenght();
-		for (int i = 0; i < z; i++) {
-			int val = get(i);
-			int pos = nuData.SearchPosition(val);
-			nuData.insert(pos, val);
-		}
+	int binarySearch(int key)
+	{
+		//demander la recherche entre 0 et la taille
+		return _binarySearch(key, 0, getLenght());
 
-		for (int i = 0; i < getLenght(); i++) {
-			set(i, nuData.get(i));
+	}
+
+	int _binarySearch(int key, int start, int end)
+	{
+		int pivot = (start + end) / 2;
+		//trouver le pivot
+		//est ce qu'on part à gauche ?
+		//est ce qu'on part à droite ?
+		//demander le sous résultat
+		if (start >= end) return 0;
+		if (key == data[pivot]) return pivot;
+		
+		if (data[pivot] > key)//va à gauche 
+		{
+			return _binarySearch(key, start, pivot - 1);
+		} 	
+		
+		if (data[pivot] < key)
+		{
+			return _binarySearch(key, pivot + 1, end);
 		}
+		
+
+
 	}
 };

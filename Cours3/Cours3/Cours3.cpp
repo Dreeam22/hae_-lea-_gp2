@@ -4,16 +4,75 @@
 #include "pch.h"
 #include <iostream>
 #include "intArray.hpp"
+#include "Util.hpp"
+
+
+void assert(bool condition) { if (!condition) throw std::exception("non"); }
 
 int main()
 {
-    std::cout << "Hello World!\n"; 
 
-	IntArray t(1);
-	t.fillwithrandom(8);
-	t.sort();
 
-	int pq = 0;
+	/*{
+		IntArray t(1);
+		t.fillwithrandom(16);
+		t.triInser();
+
+		for (int i = 0; i < t.getLenght() - 1; i++)
+		{
+			assert(t.data[i] < t.data[i + 1]);
+		}
+
+
+		int pq = 0;
+	}
+
+	{
+		double t0 = Util::getTimestamp();
+		IntArray toto;
+		toto.fillwithrandom(256);
+		toto.triInser();
+
+		for (int i = 0; i < toto.getLenght() - 1; i++)
+		{
+			assert(toto.data[i] <= toto.data[i + 1]);
+		}
+
+		double t1 = Util::getTimestamp();
+
+		printf("temps de calcul: %f s for %d\n", (t1 - t0), toto.getLenght());
+
+		int j = 0;
+	}
+
+	{
+		double t0 = Util::getTimestamp();
+		IntArray toto;
+		toto.fillwithrandom(1024);
+		toto.triInser();
+		toto.binarySearch(6);
+		for (int i = 0; i < toto.getLenght() - 1; i++)
+		{
+			assert(toto.data[i] <= toto.data[i + 1]);
+		}
+
+		double t1 = Util::getTimestamp();
+
+		printf("temps de calcul: %f s for %d\n", (t1 - t0), toto.getLenght());
+
+		int j = 0;
+	}*/
+
+	{
+		IntArray tete;
+		tete.fillwithtruc(10);
+
+		tete.binarySearch(6);
+
+
+		int p = 0;
+	}
+
 }
 
 // Exécuter le programme : Ctrl+F5 ou menu Déboguer > Exécuter sans débogage
