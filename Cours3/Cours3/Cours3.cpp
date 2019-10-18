@@ -5,14 +5,23 @@
 #include <iostream>
 #include "intArray.hpp"
 #include "Util.hpp"
+#include "List.hpp"
 
 
 void assert(bool condition) { if (!condition) throw std::exception("non"); }
 
+void testIntList() {
+	IntList * variable = new IntList(8);
+
+	//faire tests
+
+	int k = 0;
+}
+
 int main()
 {
 
-
+	testIntList();
 	/*{
 		IntArray t(1);
 		t.fillwithrandom(16);
