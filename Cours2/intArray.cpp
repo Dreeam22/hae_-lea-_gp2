@@ -16,7 +16,6 @@ bool IntArray::be_sure(int size) { //s'assure que le tableau fait au moins size
 	data = newdata;
 
 	maxSize = size;
-	printf("regrow a %d\n",size);
 	return true;
 
 }
