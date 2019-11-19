@@ -9,17 +9,17 @@ c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(
           [
               T=int
           ]
-c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(129): warning C4244: 'argument' : conversion de 'int' en 'T', perte possible de données
+c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(138): warning C4244: 'argument' : conversion de 'int' en 'T', perte possible de données
           with
           [
               T=float
           ]
-c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(289): warning C4244: 'argument' : conversion de 'T' en 'float', perte possible de données
+c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(298): warning C4244: 'argument' : conversion de 'T' en 'float', perte possible de données
           with
           [
               T=int
           ]
-c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(320): warning C4244: 'argument' : conversion de 'T' en 'T', perte possible de données
+c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(332): warning C4244: 'argument' : conversion de 'T' en 'T', perte possible de données
           with
           [
               T=int
@@ -28,5 +28,5 @@ c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(
           [
               T=float
           ]
-c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(194): warning C4101: 'fpslabel' : variable locale non référencée
+c:\workspace\frayssinhes_l\hae_-lea-_gp2\cours5_exo\cours4_sfml\cours4_sfml.cpp(203): warning C4101: 'fpslabel' : variable locale non référencée
   Cours4_SFML.vcxproj -> C:\WORKSPACE\FRAYSSINHES_L\hae_-lea-_gp2\Cours5_Exo\Debug\Cours4_SFML.exe

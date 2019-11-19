@@ -79,6 +79,12 @@ public:
 		win.draw(*sprite);
 	}
 
+	void _addforce(Vector2f dir, float spd) {
+
+		auto angle = atan2(dir.x - rec->getPosition().x, dir.y - rec->getPosition().y);
+
+		sprite->setPosition((sprite->getPosition().x + angle)*spd, (sprite->getPosition().y - angle) *spd);
+	}
 
 };
 
@@ -123,7 +129,10 @@ static void drawMovingRec(sf::RenderWindow &win)
 	
 }
 
-
+CircleShape *initCircShape(float r) {
+	auto _circle = new CircleShape(r);
+	return _circle;
+}
 
 RectangleShape *initRecShape(int x, int y) {
 	auto _rectangle = new RectangleShape(Vector2f(x, y));
@@ -144,8 +153,10 @@ static void initEntities() {
 	meuble[2]->sprite->setScale(8, 8);
 	meuble[2]->sprite->setFillColor(sf::Color(0xEB78FFff));
 
-	proj[0] = new Entity(initRecShape(8, 4), Vector2f(rec->getPosition().x, rec->getPosition().y));
-	proj[0]->sprite->setFillColor(sf::Color::Red);
+	for (int i = 0; i < 11; i++) {
+		proj[i] = new Entity(initCircShape(5), Vector2f(rec->getPosition().x, rec->getPosition().y));
+		proj[i]->sprite->setFillColor(sf::Color::Red);
+	}
 }
 
 static void drawEntities(sf::RenderWindow &win) {
@@ -242,23 +253,23 @@ int main()
 				if (event.key.code == sf::Keyboard::Q)
 				{
 					shPos.x -= squareSpeed;
-					shDir.x = -1;
-					shDir.y = 0;
+					//shDir.x = -1;
+					//shDir.y = 0;
 				}
 				if (event.key.code == sf::Keyboard::D) {
 					shPos.x += squareSpeed;
-					shDir.x = 1;
-					shDir.y = 0;
+					//shDir.x = 1;
+					//shDir.y = 0;
 				}
 				if (event.key.code == sf::Keyboard::Z) {
 					shPos.y -= squareSpeed;
-					shDir.x = 0;
-					shDir.y = -1;
+					//shDir.x = 0;
+					//shDir.y = -1;
 				}
 				if (event.key.code == sf::Keyboard::S) {
 					shPos.y += squareSpeed;
-					shDir.x = 0;
-					shDir.y = 1;
+					//shDir.x = 0;
+					//shDir.y = 1;
 				}
 
 				if (event.key.code == sf::Keyboard::A) {
@@ -267,9 +278,9 @@ int main()
 				break;
 
 			case sf::Event::KeyReleased:
-				if (event.key.code == sf::Keyboard::A) {
+				/*if (event.key.code == sf::Keyboard::A) {
 					launch = false;
-				}
+				}*/
 				break;
 			//case sf::Event::JoystickMoved:
 
@@ -303,6 +314,9 @@ int main()
 			
 		}
 
+		if (launch == true) {
+			proj[0]->_addforce(sf::Vector2f(myMouse.getPosition(window)), 1);
+		}
 
 		window.clear(); // nettoie la fenêtre
 		
@@ -320,9 +334,9 @@ int main()
 
 		window.draw(line, 2, sf::Lines);
 
-		if (launch == true) {
-			launchProj(window);
-		}
+		
+		launchProj(window);
+		
 
 		window.display(); //dessine & attends la vsync
 
