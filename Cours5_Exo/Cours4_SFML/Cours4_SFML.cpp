@@ -5,9 +5,9 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "Lib.hpp"
+#include <Box2D/Box2D.h>
 
 using namespace sf;
-
 
 static RectangleShape *rec = nullptr;
 static CircleShape *circ = nullptr;
@@ -16,9 +16,10 @@ static Vector2f shDir;
 static Vector2f circPos;
 
 int squareSpeed = 3;
-int projSpeed = 30;
 
-bool launch = false;
+b2Vec2 gravity(0.f, -10.f);
+b2World world(gravity);
+b2Vec2 inter,normal;
 
 float lerp(float a, float b, float r) {
 	return a + (b - a) * r;
@@ -63,12 +64,36 @@ public:
 
 	sf::Shape 	*sprite = nullptr; // pour le rendu
 	sf::IntRect		*box;//pour les collisions
-	Entity(sf::Shape *forme, sf::Vector2f Pos) {
+	Vector2f dir;
+	float x, y;
+	bool isProj = false;
+
+	b2BodyDef meubleBodydef;
+	b2Body* meubleBody = world.CreateBody(&meubleBodydef);
+	b2PolygonShape meubleBox;
+
+	b2RayCastOutput output;
+	b2RayCastInput input;
+	b2Transform transform;
+	int32 childIndex = 0;
+	
+	Entity(sf::Shape *forme, sf::Vector2f Pos, float angle, bool _isProj) {
 		this->sprite = forme;
 		this->sprite->setPosition(Pos.x, Pos.y);
 
 		auto coll = new IntRect(Pos.x, Pos.y, forme->getLocalBounds().width, forme->getLocalBounds().height);
 		this->box = coll;
+
+		this->dir = Vector2f(cos(angle), sin(angle));
+		this->isProj = _isProj;
+
+		this->x = rec->getPosition().x;
+		this->y = rec->getPosition().y;
+
+		meubleBodydef.position.Set(Pos.x, Pos.y);
+		meubleBox.SetAsBox(forme->getLocalBounds().width*0.5, forme->getLocalBounds().height*0.5);
+		meubleBody->CreateFixture(&meubleBox, 0.f);
+
 	}
 
 	~Entity()
@@ -79,24 +104,62 @@ public:
 		win.draw(*sprite);
 	}
 
-	void _addforce(Vector2f dir, float spd) {
-
-		auto angle = atan2(dir.x - rec->getPosition().x, dir.y - rec->getPosition().y);
-
-		sprite->setPosition((sprite->getPosition().x + angle)*spd, (sprite->getPosition().y - angle) *spd);
+	void move() {
+		x += dir.x;
+		y += dir.y;
+		sprite->setPosition(x,y);
 	}
 
+	bool willCollide(Vector2f pos, Vector2f speed, Shape * other, b2Vec2 & inter, b2Vec2 & normal) {
+
+		sf::FloatRect oBounds = other->getGlobalBounds();
+		b2Transform transform;
+		transform.SetIdentity();
+
+		b2RayCastInput input;
+		input.p1.Set(pos.x, pos.y);
+		input.p2.Set(pos.x + speed.x, pos.y + speed.y);
+
+		input.maxFraction = 1.0f;
+		int32 childIndex = 0;
+		b2RayCastOutput output;
+
+		b2PolygonShape polyB;
+
+		b2Vec2 center;
+		center.x = oBounds.left + oBounds.width * 0.5f;
+		center.y = oBounds.top + oBounds.height * 0.5f;
+
+		b2Vec2 size;
+		size.x = oBounds.width;
+		size.y = oBounds.height;
+		polyB.SetAsBox(size.x*0.5, size.y*0.5, center, 0.0f);
+
+		bool hit = polyB.RayCast(&output, input, transform, childIndex);
+		if (hit) {
+			inter = input.p1 + output.fraction * (input.p2 - input.p1);
+			normal = output.normal;
+			return true;
+		}
+		return false;
+	}
+
+	/*if (willCollide) {
+		b2Vec2 startToInter = inter - b2Vec2(p0.x, p0.y);
+		b2Vec2 refl = startToInter - 2 * Lib::dot(startToInter, normal) * normal;
+		b2Vec2 endRefl = inter + refl;
+	}*/
+	
 };
 
-static Entity *meuble[3];
+static std::vector<Entity*> meuble;
 
-static Entity *proj[5];
 
 
 static void initRec()
 {
 	rec = new RectangleShape(Vector2f(16, 16));
-	rec->setOrigin(16, 16);
+	rec->setOrigin(8, 8);
 	rec->setPosition(shPos.x = 400, shPos.y = 400);
 	rec->setFillColor(sf::Color(0xFF95D0ff));
 	rec->setOutlineColor(sf::Color(0xFFBB4Dff));
@@ -112,11 +175,11 @@ static void initRec()
 
 static void drawMovingRec(sf::RenderWindow &win)
 {
-	if (rec == nullptr) rec = new sf::RectangleShape(Vector2f(16, 16));
+	/*if (rec == nullptr) rec = new sf::RectangleShape(Vector2f(16, 16));
 	rec->setOrigin(16, 16);
 	rec->setFillColor(sf::Color(0xFF95D0ff));
 	rec->setOutlineColor(sf::Color(0xFFBB4Dff));
-	rec->setOutlineThickness(2);
+	rec->setOutlineThickness(2);*/
 	win.draw(*rec);
 
 	if (circ == nullptr) circ = new sf::CircleShape(8.f);
@@ -141,36 +204,37 @@ RectangleShape *initRecShape(int x, int y) {
 
 
 static void initEntities() {
-	meuble[0] = new Entity(initRecShape(10,10), Vector2f(0,0));
-	meuble[0]->sprite->setScale(8, 8);
-	meuble[0]->sprite->setFillColor(sf::Color(0xEB78FFff));	
+	auto meuble1 = new Entity(initRecShape(10,10), Vector2f(0,0),0,false);
+	meuble1->sprite->setScale(8, 8);
+	meuble1->sprite->setFillColor(sf::Color(0xEB78FFff));	
+	meuble.push_back(meuble1);
 
-	meuble[1] = new Entity(initRecShape(10, 10), Vector2f(800, 500));
-	meuble[1]->sprite->setScale(8, 8);
-	meuble[1]->sprite->setFillColor(sf::Color(0xEB78FFff));
+	auto meuble2 = new Entity(initRecShape(10, 10), Vector2f(800, 500),0,false);
+	meuble2->sprite->setScale(8, 8);
+	meuble2->sprite->setFillColor(sf::Color(0xEB78FFff));
+	meuble.push_back(meuble2);
 
-	meuble[2] = new Entity(initRecShape(10, 10),Vector2f(100,100));
-	meuble[2]->sprite->setScale(8, 8);
-	meuble[2]->sprite->setFillColor(sf::Color(0xEB78FFff));
+	auto meuble3 = new Entity(initRecShape(10, 10),Vector2f(100,100),0,false);
+	meuble3->sprite->setScale(8, 8);
+	meuble3->sprite->setFillColor(sf::Color(0xEB78FFff));
+	meuble.push_back(meuble3);
 
-	for (int i = 0; i < 11; i++) {
-		proj[i] = new Entity(initCircShape(5), Vector2f(rec->getPosition().x, rec->getPosition().y));
-		proj[i]->sprite->setFillColor(sf::Color::Red);
-	}
+	
 }
 
 static void drawEntities(sf::RenderWindow &win) {
-	if (meuble == nullptr) initEntities();
 
-	for (int i = 0; i <3; i++) {
+	for (int i = 0; i <meuble.size(); i++) {
 		meuble[i]->_draw(win);		
 	}	
 }
 
 void launchProj(sf::RenderWindow &win) {
-	auto angle = atan2(sf::Mouse::getPosition().x - rec->getPosition().x, sf::Mouse::getPosition().y - rec->getPosition().y);
 
-	proj[0]->_draw(win);
+	auto angle = atan2(sf::Mouse::getPosition(win).y - rec->getPosition().y, sf::Mouse::getPosition(win).x - rec->getPosition().x);
+	
+	auto proj = new Entity(initRecShape(4,4), Vector2f(rec->getPosition().x, rec->getPosition().y), angle,true);
+	meuble.push_back(proj);
 }
 
 
@@ -181,12 +245,6 @@ int main()
 
 	sf::RenderWindow window(sf::VideoMode(1240, 720), "SFML works!", sf::Style::Default, settings); //taille de la fenêtre
 	window.setVerticalSyncEnabled(true);
-	/*sf::CircleShape shape(200.f);  //forme
-	shape.setFillColor(sf::Color(0xFF8C71ff));  //couleur
-	shape.setOutlineThickness(4);
-	shape.setOutlineColor(sf::Color(0xE8AE5Aff));*/
-
-	
 
 	sf::Clock clock;
 
@@ -225,12 +283,10 @@ int main()
 
 	initRec();
 	initEntities();
-
-	/*auto recbounds = rec->getGlobalBounds();
-	auto recbounds2 = meuble[1]->sprite->getGlobalBounds();*/
 	
 
 	if (sf::Joystick::isConnected(0)) myJoystick.setString("Connected");
+
 
 	while (window.isOpen())  // on passe tout le temps
 	{
@@ -273,14 +329,12 @@ int main()
 				}
 
 				if (event.key.code == sf::Keyboard::A) {
-					launch = true;
+					launchProj(window);
 				}
 				break;
 
 			case sf::Event::KeyReleased:
-				/*if (event.key.code == sf::Keyboard::A) {
-					launch = false;
-				}*/
+				
 				break;
 			//case sf::Event::JoystickMoved:
 
@@ -300,50 +354,48 @@ int main()
 			for( Entity * ent : meuble )
 			{
 				if (rec->getGlobalBounds().intersects(ent->sprite->getGlobalBounds()) == true) {
-					printf("coll ");
+					//printf("coll ");
 					squareSpeed = 0;
 					shPos.x = lastGoodPos.x;
 					shPos.y = lastGoodPos.y;
 					break;  
 				}
 				else
-					squareSpeed = 30;
+					squareSpeed = 5;
+				
 			}
-	
-			
-			
-		}
 
-		if (launch == true) {
-			proj[0]->_addforce(sf::Vector2f(myMouse.getPosition(window)), 1);
 		}
 
 		window.clear(); // nettoie la fenêtre
 		
 		//window.draw(myFPScounter); // on demande le dessin d'une forme
 		//window.draw(myMousePos);
-		drawEntities(window);
+		
+		for (int i = 0; i < meuble.size(); i++)
+		{		
+			if (meuble[i]->isProj)
+			{				
+				meuble[i]->move();
+			}
+		}
 
-		window.draw(myJoystick);	
-		drawMovingRec(window);
+		drawEntities(window);			
+		
 
 		sf::Vertex line[] = {
-		sf::Vertex(sf::Vector2f(shPos.x, shPos.y)),
+		sf::Vertex(sf::Vector2f(rec->getPosition())),
 		sf::Vertex(sf::Vector2f(myMouse.getPosition(window).x, myMouse.getPosition(window).y))
 		};
-
 		window.draw(line, 2, sf::Lines);
+		drawMovingRec(window);
 
-		
-		launchProj(window);
-		
+		window.draw(myJoystick);
 
 		window.display(); //dessine & attends la vsync
 
 		fps[step % 4] = 1.0f/(frameStart - prevFrameStart).asSeconds();
 		prevFrameStart = frameStart;
-
-		
 
 		step++;
 	}
