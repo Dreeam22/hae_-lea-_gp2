@@ -31,6 +31,32 @@ static sf::Texture * texture = nullptr;
 
 const int squareSpeed = 3;
 
+static sf::Transform s_Initial;
+static std::vector<sf::Transform> s_Trs;
+
+static bool _changeColor = false;
+class Turtle : public sf::ConvexShape
+{
+public:
+
+	sf::Transform m_Trs;
+
+	Turtle() : sf::ConvexShape(3) {
+		setFillColor(sf::Color(0xCCFFDEff));
+		setOutlineThickness(2);
+		setOutlineColor(sf::Color(0xFF0200ff));
+
+		setPoint(0, Vector2f(0, -24));
+		setPoint(1, Vector2f(-16, 16));
+		setPoint(2, Vector2f(16, 16));
+	}
+	void setTransform(sf::Transform trs) {
+		m_Trs = trs;
+	}
+};
+
+static std::vector<Turtle*> _turtle;
+
 float lerp(float a, float b, float r) {
 	return a + (b - a) * r;
 }
@@ -190,6 +216,165 @@ static void drawMovingRec(sf::RenderWindow &win)
 	win.draw(*rec);
 }
 
+static void startTransform() {
+	s_Initial = Transform::Identity;
+	s_Initial.translate(600, 360);
+	s_Initial.rotate(90);
+}
+
+static void translateX(float dx) {
+	sf::Transform res;
+	res.translate(dx, 0);
+	s_Trs.push_back(res);
+}
+
+static void translateY(float dy) {
+	sf::Transform res;
+	res.translate(0, dy);
+	s_Trs.push_back(res);
+}
+
+static void rotate(float degrees) {
+	sf::Transform res;
+	res.rotate(degrees);
+	s_Trs.push_back(res);
+}
+
+static void scaleXY(float dx, float dy) {
+	sf::Transform res;
+	res.scale(dx, dy);
+	s_Trs.push_back(res);
+}
+
+static void scaleXY(float dxy) {
+	sf::Transform res;
+	res.scale(dxy, dxy);
+	s_Trs.push_back(res);
+}
+
+static void scaleX(float dx) {
+	sf::Transform res;
+	res.scale(dx, 0);
+	s_Trs.push_back(res);
+}
+
+static void scaleY(float dy) {
+	sf::Transform res;
+	res.scale(0, dy);
+	s_Trs.push_back(res);
+}
+
+
+static void computeTransform(sf::Transform & results, int step =-1) {
+	sf::Transform inter;
+
+	inter.combine(s_Initial);
+
+	if (step <= -1) {
+		for (sf::Transform t : s_Trs) {
+			inter = inter.combine(t);
+		}
+	}
+	else {
+		step--;
+		for (sf::Transform t : s_Trs) {
+			inter = inter.combine(t);
+			if (step <= 0)break;
+		}
+	}
+	results = inter;
+}
+
+void plotTurtle()
+{
+	sf::Transform cur;
+	computeTransform(cur, s_Trs.size() - 1);
+	Turtle* t = new Turtle();
+	t->setTransform(cur);
+	t->setFillColor(_changeColor == true ? Color(0xFF0000ff) : Color(0x0116FFff));
+	_changeColor = !_changeColor;
+	_turtle.push_back(t);	
+}
+
+
+bool startsWith(const char * s0, const char * s1) {
+	if (*s0 == 0 && *s1 != 0)
+		return false;
+	if (*s1 == 0)
+		return true;
+	if (*s0 != *s1)
+		return false;
+	else
+		return startsWith(s0 + 1, s1 + 1);
+}
+
+enum TurtleCommand {
+	AV,
+	REC,
+	GROSSI,
+	RET,
+	L45,
+	R45,
+	COLOR_R,
+	COLOR_B,
+};
+static std::vector<TurtleCommand> cmd;
+
+static char data[1024];
+static void readScript() {
+	FILE * f = nullptr;
+	auto err = fopen_s(&f,"res/scriptTortue.txt", "r");
+	if (f != nullptr) {
+		memset(data, 0, 1024);
+		fread(data, 2014, 1, f);
+		printf("read file %s\n", data);
+		fclose(f);
+	}
+	else {
+		printf("cannot read txt file");
+	}
+
+	char *cur = data;
+	bool doContinue = true;
+	while (doContinue)
+	{
+		if (*cur == 0 || cur ==nullptr) break;
+		else {
+			if (startsWith(cur, "AV")) {
+				cmd.push_back(AV);
+			}
+			if (startsWith(cur, "REC")) {
+				cmd.push_back(REC);
+			}
+			if (startsWith(cur, "GROSSI")) {
+				cmd.push_back(GROSSI);
+			}
+
+			if (startsWith(cur, "RET")) {
+				cmd.push_back(RET);
+			}
+
+			if (startsWith(cur, "L45")) {
+				cmd.push_back(L45);
+			}
+			if (startsWith(cur, "R45")) {
+				cmd.push_back(R45);
+			}
+			if (startsWith(cur, "CR")) {
+				cmd.push_back(COLOR_R);
+			}
+			if (startsWith(cur, "CB")) {
+				cmd.push_back(COLOR_B);
+			}
+			cur = strstr(cur, " ");
+			if (!cur) {
+				break;
+			}
+			else cur++;
+		}
+	}
+}
+
 int main()
 {
 	std::cout << "Hello World!\n";
@@ -250,6 +435,7 @@ int main()
 	int every = 0;	
 
 	initRec();
+	readScript();
 
 
 	while (window.isOpen())  // on passe tout le temps
@@ -287,39 +473,7 @@ int main()
 						printf("instant fps %f\n", fps[(step - 1) % 4]);  //fps instantané
 				}
 
-				if (event.key.code == sf::Keyboard::F1)
-				{
-					f1 = sf::Vector2f(myMouse.getPosition(window));					
-				}
-				if (event.key.code == sf::Keyboard::F2)
-				{
-					f2 = sf::Vector2f(myMouse.getPosition(window));
-				}
-				if (event.key.code == sf::Keyboard::F3)
-				{
-					f3 = sf::Vector2f(myMouse.getPosition(window));
-				}
-				if (event.key.code == sf::Keyboard::F4)
-				{
-					f4 = sf::Vector2f(myMouse.getPosition(window));
-				}
-				if (event.key.code == sf::Keyboard::F5)
-				{
-					f5 = sf::Vector2f(myMouse.getPosition(window));
-				}
-				if (event.key.code == sf::Keyboard::F6)
-				{
-					f6 = sf::Vector2f(myMouse.getPosition(window));
-				}
-				if (event.key.code == sf::Keyboard::F7)
-				{
-					f7 = sf::Vector2f(myMouse.getPosition(window));
-				}
-				if (event.key.code == sf::Keyboard::F8)
-				{
-					f8 = sf::Vector2f(myMouse.getPosition(window));
-				}
-
+				
 				if (event.key.code == sf::Keyboard::Left)
 				{
 					shPos.x -= squareSpeed;
@@ -342,8 +496,75 @@ int main()
 					shDir.y = 1;
 				}
 
+				
 				break;
 
+			case sf::Event::KeyReleased: {
+				if (event.key.code == sf::Keyboard::Space) {
+					startTransform();
+
+					sf::Transform trs;
+					computeTransform(trs);
+
+					for (Turtle*t : _turtle) delete t;
+					_turtle.clear();
+
+					Turtle* t = new Turtle();
+					t->setTransform(trs);
+					_turtle.push_back(t);
+				}
+
+				auto delta = 32;
+
+				if (event.key.code == sf::Keyboard::Up) { translateY(-delta);	   plotTurtle(); }
+				if (event.key.code == sf::Keyboard::Down) { translateY(delta);	   plotTurtle(); }
+
+				if (event.key.code == sf::Keyboard::Left) { rotate(-45);			   plotTurtle(); }
+				if (event.key.code == sf::Keyboard::Right) { rotate(45);			   plotTurtle(); }
+
+				if (event.key.code == sf::Keyboard::Add) { scaleXY(2.0);			   plotTurtle(); }
+				if (event.key.code == sf::Keyboard::Subtract) { scaleXY(0.5);			   plotTurtle(); }
+
+				if (event.key.code == sf::Keyboard::F2) {
+					for (TurtleCommand tc : cmd) {
+						switch (tc)
+						{
+						case AV:
+							translateY(-delta);	   plotTurtle();
+							break;
+						case REC:
+							translateY(delta);	   plotTurtle();
+							break;
+						case GROSSI:
+							scaleXY(10.0);			   plotTurtle();
+							break;
+
+						case RET:
+							scaleXY(0.1);			   plotTurtle();
+							break;
+
+						case L45:
+							rotate(-45);			   plotTurtle();
+							break;
+						case R45:
+							rotate(45);			   plotTurtle();
+							break;
+						case COLOR_B:
+								   plotTurtle();
+							break;
+						case COLOR_R:
+								   plotTurtle();
+							break;
+
+						default:
+							break;
+						}
+
+					}
+				}
+
+				break; 
+			}
 			case sf::Event::Closed:
 				window.close();
 				break;
@@ -364,12 +585,18 @@ int main()
 		drawCurve(window, clock.getElapsedTime().asSeconds());
 		drawCatmull(window, clock.getElapsedTime().asSeconds());*/
 
-		sf::RectangleShape sh(Vector2f(64, 64));
+		/*sf::RectangleShape sh(Vector2f(64, 64));
 		sh.setPosition(50, 50);
 		sh.setTexture(whitetext);
 		simpleshader->setUniform("time", clock.getElapsedTime().asSeconds());
-		window.draw(sh, simpleshader);
+		window.draw(sh, simpleshader);*/
 
+		for (Turtle*t : _turtle) {
+			RenderStates rs;
+			rs.transform = t->m_Trs;
+			window.draw(*t,rs);
+		}
+	
 		window.display(); //dessine & attends la vsync
 
 		fps[step % 4] = 1.0f/(frameStart - prevFrameStart).asSeconds();
