@@ -67,15 +67,6 @@ public:
 	Vector2f dir;
 	float x, y;
 	bool isProj = false;
-
-	b2BodyDef meubleBodydef;
-	b2Body* meubleBody = world.CreateBody(&meubleBodydef);
-	b2PolygonShape meubleBox;
-
-	b2RayCastOutput output;
-	b2RayCastInput input;
-	b2Transform transform;
-	int32 childIndex = 0;
 	
 	Entity(sf::Shape *forme, sf::Vector2f Pos, float angle, bool _isProj) {
 		this->sprite = forme;
@@ -89,10 +80,6 @@ public:
 
 		this->x = rec->getPosition().x;
 		this->y = rec->getPosition().y;
-
-		meubleBodydef.position.Set(Pos.x, Pos.y);
-		meubleBox.SetAsBox(forme->getLocalBounds().width*0.5, forme->getLocalBounds().height*0.5);
-		meubleBody->CreateFixture(&meubleBox, 0.f);
 
 	}
 
@@ -110,46 +97,11 @@ public:
 		sprite->setPosition(x,y);
 	}
 
-	bool willCollide(Vector2f pos, Vector2f speed, Shape * other, b2Vec2 & inter, b2Vec2 & normal) {
-
-		sf::FloatRect oBounds = other->getGlobalBounds();
-		b2Transform transform;
-		transform.SetIdentity();
-
-		b2RayCastInput input;
-		input.p1.Set(pos.x, pos.y);
-		input.p2.Set(pos.x + speed.x, pos.y + speed.y);
-
-		input.maxFraction = 1.0f;
-		int32 childIndex = 0;
-		b2RayCastOutput output;
-
-		b2PolygonShape polyB;
-
-		b2Vec2 center;
-		center.x = oBounds.left + oBounds.width * 0.5f;
-		center.y = oBounds.top + oBounds.height * 0.5f;
-
-		b2Vec2 size;
-		size.x = oBounds.width;
-		size.y = oBounds.height;
-		polyB.SetAsBox(size.x*0.5, size.y*0.5, center, 0.0f);
-
-		bool hit = polyB.RayCast(&output, input, transform, childIndex);
-		if (hit) {
-			inter = input.p1 + output.fraction * (input.p2 - input.p1);
-			normal = output.normal;
-			return true;
-		}
-		return false;
+	void coll() {
+		
+		//sprite->setPosition(x, );
 	}
 
-	/*if (willCollide) {
-		b2Vec2 startToInter = inter - b2Vec2(p0.x, p0.y);
-		b2Vec2 refl = startToInter - 2 * Lib::dot(startToInter, normal) * normal;
-		b2Vec2 endRefl = inter + refl;
-	}*/
-	
 };
 
 static std::vector<Entity*> meuble;
@@ -373,11 +325,20 @@ int main()
 		//window.draw(myMousePos);
 		
 		for (int i = 0; i < meuble.size(); i++)
-		{		
+		{	
 			if (meuble[i]->isProj)
-			{				
+			{	
 				meuble[i]->move();
+				for (int j = 0; j < meuble.size(); j++) {
+
+					if (meuble[i]->sprite->getGlobalBounds().intersects(meuble[j]->sprite->getGlobalBounds()) && i != j && !meuble[j]->isProj)
+					{
+						printf("coll");
+						//meuble[i]->coll();
+					}
+				}
 			}
+			
 		}
 
 		drawEntities(window);			
