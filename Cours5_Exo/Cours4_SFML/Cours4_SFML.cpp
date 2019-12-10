@@ -97,9 +97,12 @@ public:
 		sprite->setPosition(x,y);
 	}
 
-	void coll() {
+	void coll(float posXProj, float posYProj, float posXmeuble, float posYmeuble) {
 		
-		//sprite->setPosition(x, );
+		if (posXProj < posXmeuble) { dir.x *= 1; }
+		if (posYProj < posYmeuble) { dir.y *= -1; }
+		
+		
 	}
 
 };
@@ -226,6 +229,8 @@ int main()
 	myFPScounter.setFont(MyFont);
 	sf::Text myMousePos;
 	myMousePos.setFont(MyFont);
+	sf::Text myCharaPos;
+	myCharaPos.setFont(MyFont);
 	sf::Text myJoystick;
 	myJoystick.setFont(MyFont);
 
@@ -248,8 +253,11 @@ int main()
 		if (every == 0)
 		{
 			myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));
-			myMousePos.setString("MousePos : " + std::to_string(myMouse.getPosition(window).x));
-			myMousePos.setPosition(1000, 0);
+			myMousePos.setString("MousePos : " + std::to_string(myMouse.getPosition(window).x)+ "," + std::to_string(myMouse.getPosition(window).y));
+			myMousePos.setPosition(500, 0);
+
+			myCharaPos.setString("PosChara : " + std::to_string(rec->getPosition().x)+ "," + std::to_string(rec->getPosition().y));
+			myCharaPos.setPosition(0, 500);
 		
 		}
 		while (window.pollEvent(event))  //met l'évènement en premier de la queue
@@ -334,7 +342,7 @@ int main()
 					if (meuble[i]->sprite->getGlobalBounds().intersects(meuble[j]->sprite->getGlobalBounds()) && i != j && !meuble[j]->isProj)
 					{
 						printf("coll");
-						//meuble[i]->coll();
+						meuble[i]->coll(meuble[i]->sprite->getPosition().x, meuble[i]->sprite->getPosition().y, meuble[j]->sprite->getPosition().x, meuble[j]->sprite->getPosition().y);
 					}
 				}
 			}
@@ -352,6 +360,8 @@ int main()
 		drawMovingRec(window);
 
 		window.draw(myJoystick);
+		window.draw(myMousePos);
+		window.draw(myCharaPos);
 
 		window.display(); //dessine & attends la vsync
 
