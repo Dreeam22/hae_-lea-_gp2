@@ -63,7 +63,7 @@ class Entity {
 public:
 
 	sf::Shape 	*sprite = nullptr; // pour le rendu
-	sf::IntRect		*box;//pour les collisions
+	sf::FloatRect		box;//pour les collisions
 	Vector2f dir;
 	float x, y;
 	bool isProj = false;
@@ -72,8 +72,7 @@ public:
 		this->sprite = forme;
 		this->sprite->setPosition(Pos.x, Pos.y);
 
-		auto coll = new IntRect(Pos.x, Pos.y, forme->getLocalBounds().width, forme->getLocalBounds().height);
-		this->box = coll;
+		this->box = forme->getGlobalBounds();
 
 		this->dir = Vector2f(cos(angle), sin(angle));
 		this->isProj = _isProj;
@@ -97,11 +96,12 @@ public:
 		sprite->setPosition(x,y);
 	}
 
-	void coll(float posXProj, float posYProj, float posXmeuble, float posYmeuble) {
-		
-		if (posXProj < posXmeuble) { dir.x *= 1; }
-		if (posYProj < posYmeuble) { dir.y *= -1; }
-		
+	void coll(float posXProj, float posYProj, Entity* meuble) {
+
+		auto meublePos = meuble->sprite->getPosition();
+		auto meubleOff = meuble->box;
+		if (posXProj < meublePos.x || posXProj > meublePos.x + meubleOff.width) { dir.x *= -1; }
+		else if (posYProj < meublePos.y || posYProj > meublePos.y + meubleOff.height ) { dir.y *= -1; }
 		
 	}
 
@@ -159,18 +159,18 @@ RectangleShape *initRecShape(int x, int y) {
 
 
 static void initEntities() {
-	auto meuble1 = new Entity(initRecShape(10,10), Vector2f(0,0),0,false);
-	meuble1->sprite->setScale(8, 8);
+	auto meuble1 = new Entity(initRecShape(80,80), Vector2f(0,0),0,false);
+	//meuble1->sprite->setOrigin(4, 4);
 	meuble1->sprite->setFillColor(sf::Color(0xEB78FFff));	
 	meuble.push_back(meuble1);
 
-	auto meuble2 = new Entity(initRecShape(10, 10), Vector2f(800, 500),0,false);
-	meuble2->sprite->setScale(8, 8);
+	auto meuble2 = new Entity(initRecShape(80, 80), Vector2f(800, 500),0,false);
+	//meuble2->sprite->setOrigin(4, 4);
 	meuble2->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble2);
 
-	auto meuble3 = new Entity(initRecShape(10, 10),Vector2f(100,100),0,false);
-	meuble3->sprite->setScale(8, 8);
+	auto meuble3 = new Entity(initRecShape(80, 80),Vector2f(100,100),0,false);
+	//meuble3->sprite->setOrigin(4, 4);
 	meuble3->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble3);
 
@@ -189,6 +189,8 @@ void launchProj(sf::RenderWindow &win) {
 	auto angle = atan2(sf::Mouse::getPosition(win).y - rec->getPosition().y, sf::Mouse::getPosition(win).x - rec->getPosition().x);
 	
 	auto proj = new Entity(initRecShape(4,4), Vector2f(rec->getPosition().x, rec->getPosition().y), angle,true);
+	proj->sprite->setOrigin(2, 4);
+	proj->sprite->setRotation(angle * (180 / 3.14159265359));
 	meuble.push_back(proj);
 }
 
@@ -253,7 +255,7 @@ int main()
 		if (every == 0)
 		{
 			myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));
-			myMousePos.setString("MousePos : " + std::to_string(myMouse.getPosition(window).x)+ "," + std::to_string(myMouse.getPosition(window).y));
+			myMousePos.setString("MousePos : " + std::to_string(myMouse.getPosition(window).x)+ " x ," + std::to_string(myMouse.getPosition(window).y));
 			myMousePos.setPosition(500, 0);
 
 			myCharaPos.setString("PosChara : " + std::to_string(rec->getPosition().x)+ "," + std::to_string(rec->getPosition().y));
@@ -342,7 +344,7 @@ int main()
 					if (meuble[i]->sprite->getGlobalBounds().intersects(meuble[j]->sprite->getGlobalBounds()) && i != j && !meuble[j]->isProj)
 					{
 						printf("coll");
-						meuble[i]->coll(meuble[i]->sprite->getPosition().x, meuble[i]->sprite->getPosition().y, meuble[j]->sprite->getPosition().x, meuble[j]->sprite->getPosition().y);
+						meuble[i]->coll(meuble[i]->sprite->getPosition().x, meuble[i]->sprite->getPosition().y, meuble[j]);
 					}
 				}
 			}
@@ -360,8 +362,8 @@ int main()
 		drawMovingRec(window);
 
 		window.draw(myJoystick);
-		window.draw(myMousePos);
-		window.draw(myCharaPos);
+		//window.draw(myMousePos);
+		//window.draw(myCharaPos);
 
 		window.display(); //dessine & attends la vsync
 
