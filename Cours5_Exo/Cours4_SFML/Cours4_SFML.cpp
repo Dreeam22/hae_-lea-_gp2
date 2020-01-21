@@ -11,16 +11,20 @@ using namespace sf;
 
 static RectangleShape *rec = nullptr;
 static CircleShape *circ = nullptr;
+static RectangleShape *canon = nullptr;
 static Vector2f shPos;
 static Vector2f shDir;
 static Vector2f circPos;
 
+float angleVisee;
+float angle;
+float Xjoy1 = 0, Yjoy1 = 0, Ujoy1 = 0, Vjoy1 = 0, Zjoy1 = 0;
+
 int squareSpeed = 3;
 
-b2Vec2 gravity(0.f, -10.f);
-b2World world(gravity);
-b2Vec2 inter,normal;
+float JoySpeed = 0.1f;
 
+bool shoot = false;
 float lerp(float a, float b, float r) {
 	return a + (b - a) * r;
 }
@@ -121,11 +125,19 @@ static void initRec()
 	rec->setOutlineThickness(2);
 
 	circ = new CircleShape(8.f);
-	circ->setOrigin(8, 8);
-	circ->setPosition(circPos.x = 600, circPos.y = 600);
+	circ->setOrigin(-80, -80);
+	circ->setPosition(shPos.x = 500, shPos.y = 400);
 	circ->setFillColor(sf::Color(0x4EEB83ff));
 	circ->setOutlineColor(sf::Color(0x000000ff));
 	circ->setOutlineThickness(1);
+
+	canon = new RectangleShape(Vector2f(8, 24));
+	canon->setOrigin(4, 4);
+	canon->setPosition(shPos.x = 500, shPos.y = 400);
+	canon->setRotation(90);
+	canon->setFillColor(sf::Color(0x4EEB83ff));
+	canon->setOutlineColor(sf::Color(0x000000ff));
+	canon->setOutlineThickness(1);
 }
 
 static void drawMovingRec(sf::RenderWindow &win)
@@ -137,13 +149,13 @@ static void drawMovingRec(sf::RenderWindow &win)
 	rec->setOutlineThickness(2);*/
 	win.draw(*rec);
 
-	if (circ == nullptr) circ = new sf::CircleShape(8.f);
-	circ->setOrigin(8, 8);
+	/*if (circ == nullptr) circ = new sf::CircleShape(8.f);
+	circ->setOrigin(rec->getPosition().x, rec->getPosition().y);
 	circ->setFillColor(sf::Color(0x4EEB83ff));
 	circ->setOutlineColor(sf::Color(0x000000ff));
-	circ->setOutlineThickness(1);
-	win.draw(*circ);
-
+	circ->setOutlineThickness(1);*/
+	//win.draw(*circ);
+	win.draw(*canon);
 	
 }
 
@@ -186,12 +198,11 @@ static void drawEntities(sf::RenderWindow &win) {
 
 void launchProj(sf::RenderWindow &win) {
 
-	auto angle = atan2(sf::Mouse::getPosition(win).y - rec->getPosition().y, sf::Mouse::getPosition(win).x - rec->getPosition().x);
-	
 	auto proj = new Entity(initRecShape(4,4), Vector2f(rec->getPosition().x, rec->getPosition().y), angle,true);
 	proj->sprite->setOrigin(2, 4);
-	proj->sprite->setRotation(angle * (180 / 3.14159265359));
+	//proj->sprite->setRotation(angleVisee);
 	meuble.push_back(proj);
+	shoot = false;
 }
 
 
@@ -229,22 +240,11 @@ int main()
 
 	sf::Text myFPScounter;
 	myFPScounter.setFont(MyFont);
-	sf::Text myMousePos;
-	myMousePos.setFont(MyFont);
-	sf::Text myCharaPos;
-	myCharaPos.setFont(MyFont);
-	sf::Text myJoystick;
-	myJoystick.setFont(MyFont);
-
-	sf::Mouse myMouse;
 	
 	int every = 0;	
 
 	initRec();
 	initEntities();
-	
-
-	if (sf::Joystick::isConnected(0)) myJoystick.setString("Connected");
 
 
 	while (window.isOpen())  // on passe tout le temps
@@ -252,23 +252,50 @@ int main()
 		sf::Event event; 
 		frameStart = clock.getElapsedTime();		
 		window.setMouseCursorVisible(false);
+
+		
+
 		if (every == 0)
 		{
-			myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));
-			myMousePos.setString("MousePos : " + std::to_string(myMouse.getPosition(window).x)+ " x ," + std::to_string(myMouse.getPosition(window).y));
-			myMousePos.setPosition(500, 0);
-
-			myCharaPos.setString("PosChara : " + std::to_string(rec->getPosition().x)+ "," + std::to_string(rec->getPosition().y));
-			myCharaPos.setPosition(0, 500);
+			myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));					
 		
 		}
 		while (window.pollEvent(event))  //met l'évènement en premier de la queue
-		{
-			switch (event.type)					
+		{			
+			
+			switch (event.type)
 			{
+
+			case sf::Event::JoystickMoved:
+				if (event.joystickMove.joystickId == 0){
+					if (event.joystickMove.axis == sf::Joystick::X)
+					{
+						Xjoy1 = event.joystickMove.position;					
+					}
+					if (event.joystickMove.axis == sf::Joystick::Y) {												
+						Yjoy1 = event.joystickMove.position;
+					}
+					if (event.joystickMove.axis == sf::Joystick::U)
+					{
+						Ujoy1 = event.joystickMove.position;
+					}
+					if (event.joystickMove.axis == sf::Joystick::V)
+					{
+						Vjoy1 = event.joystickMove.position;
+					}
+					if (event.joystickMove.axis == sf::Joystick::Z) {
+						Zjoy1 = event.joystickMove.position;
+					}
+				}
+
+		
+				break;
+
+			
+
 			case sf::Event::KeyPressed:						
 				
-				if (event.key.code == sf::Keyboard::Q)
+				/*if (event.key.code == sf::Keyboard::Q )
 				{
 					shPos.x -= squareSpeed;
 					//shDir.x = -1;
@@ -292,13 +319,12 @@ int main()
 
 				if (event.key.code == sf::Keyboard::A) {
 					launchProj(window);
-				}
+				}*/
 				break;
 
 			case sf::Event::KeyReleased:
 				
 				break;
-			//case sf::Event::JoystickMoved:
 
 			case sf::Event::Closed:
 				window.close();
@@ -308,26 +334,60 @@ int main()
 				break;
 			}
 
-			Vector2f lastGoodPos = rec->getPosition();
+			float lastRot = canon->getRotation();
+#pragma region deadzone
 
-			rec->setPosition(shPos);
-			circ->setPosition(myMouse.getPosition(window).x, myMouse.getPosition(window).y);
+			if (Xjoy1 > 15 || Xjoy1 < -15) 
+				shPos.x += Xjoy1 * JoySpeed;			
 
-			for( Entity * ent : meuble )
+			if (Yjoy1 > 15 || Yjoy1 < -15)
+				shPos.y += Yjoy1 * JoySpeed;
+
+			if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {	
+				angle = atan2(Vjoy1, Ujoy1);
+				angleVisee = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
+			}
+			else if (Ujoy1 == 0 || Vjoy1 == 0)
+			{
+				angleVisee = lastRot;
+			}
+
+			if (Zjoy1 > 80 || Zjoy1 < -80 && Zjoy1 != 100 && Zjoy1 != -100)
+			{
+				if (shoot == true)
+					launchProj(window);
+			}
+			
+			if (Zjoy1 < 25 && Zjoy1 > -25) shoot = true;
+							
+
+#pragma endregion			
+			
+			Vector2f lastGoodPos = rec->getPosition();			
+		
+			rec->setPosition(shPos);		
+			circ->setPosition(shPos);
+
+			canon->setPosition(shPos);
+			canon->setRotation(-angleVisee);
+
+			circ->setRotation(-angleVisee);
+
+			for (Entity * ent : meuble)
 			{
 				if (rec->getGlobalBounds().intersects(ent->sprite->getGlobalBounds()) == true) {
 					//printf("coll ");
-					squareSpeed = 0;
+					JoySpeed = 0.f;
 					shPos.x = lastGoodPos.x;
 					shPos.y = lastGoodPos.y;
-					break;  
+					break;
 				}
 				else
-					squareSpeed = 5;
-				
-			}
+					JoySpeed = 0.1f;
 
+			}
 		}
+
 
 		window.clear(); // nettoie la fenêtre
 		
@@ -354,16 +414,12 @@ int main()
 		drawEntities(window);			
 		
 
-		sf::Vertex line[] = {
+		/*sf::Vertex line[] = {
 		sf::Vertex(sf::Vector2f(rec->getPosition())),
-		sf::Vertex(sf::Vector2f(myMouse.getPosition(window).x, myMouse.getPosition(window).y))
+		sf::Vertex(sf::Vector2f(circ->getPosition()))
 		};
-		window.draw(line, 2, sf::Lines);
+		window.draw(line, 2, sf::Lines);*/
 		drawMovingRec(window);
-
-		window.draw(myJoystick);
-		//window.draw(myMousePos);
-		//window.draw(myCharaPos);
 
 		window.display(); //dessine & attends la vsync
 
