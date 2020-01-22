@@ -13,7 +13,7 @@ public:
 		this->sprite = forme;
 		this->sprite->setPosition(Pos.x, Pos.y);
 
-		this->box = forme->getGlobalBounds();
+		this->box = this->sprite->getGlobalBounds();
 
 	}
 

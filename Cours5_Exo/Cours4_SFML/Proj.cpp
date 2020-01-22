@@ -9,14 +9,18 @@ void Proj::_draw(sf::RenderWindow & win) {
 void Proj::move() {
 	x += dir.x * projSpeed;
 	y += dir.y * projSpeed;
-	sprite->setPosition(x, y);
+	this->sprite->setPosition(x, y);
+
+	this->box = this->sprite->getGlobalBounds();
 }
 
-void Proj::coll(float posXProj, float posYProj, Entity * meuble) {
+void Proj::coll(Entity * meuble) {
 
+	auto posProj = this->sprite->getPosition();
 	auto meublePos = meuble->sprite->getPosition();
 	auto meubleOff = meuble->box;
-	if (posXProj < meublePos.x || posXProj > meublePos.x + meubleOff.width) { dir.x *= -1; }
-	else if (posYProj < meublePos.y || posYProj > meublePos.y + meubleOff.height) { dir.y *= -1; }
+
+	if (posProj.x > meublePos.x + meubleOff.width || posProj.x < meublePos.x ) { dir.x *= -1; }
+	else if (posProj.y > meublePos.y + meubleOff.height || posProj.y < meublePos.y ) { dir.y *= -1; }
 
 }

@@ -29,7 +29,7 @@ int squareSpeed = 3;
 float JoySpeed = 0.1f;
 bool shoot = false;
 
-RectangleShape *initRecShape(int x, int y) {
+RectangleShape *initRecShape(float x, float y) {
 	auto _rectangle = new RectangleShape(Vector2f(x, y));
 	return _rectangle;
 }
@@ -73,9 +73,9 @@ float rd() {
 }*/
 
 
-
-static std::vector<Proj*> _proj;
 static std::vector<Entity*> meuble;
+static std::vector<Proj*> _proj;
+
 
 
 
@@ -147,17 +147,17 @@ static void drawChar(sf::RenderWindow &win, int player)
 }
 
 static void initEntities() {
-	auto meuble1 = new Entity(initRecShape(80,80), Vector2f(0,0));
+	auto meuble1 = new Entity(initRecShape(80.0f,80.0f), Vector2f(0,0));
 	//meuble1->sprite->setOrigin(4, 4);
 	meuble1->sprite->setFillColor(sf::Color(0xEB78FFff));	
 	meuble.push_back(meuble1);
 
-	auto meuble2 = new Entity(initRecShape(80, 80), Vector2f(800, 500));
+	auto meuble2 = new Entity(initRecShape(80.0f, 80.0f), Vector2f(800, 500));
 	//meuble2->sprite->setOrigin(4, 4);
 	meuble2->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble2);
 
-	auto meuble3 = new Entity(initRecShape(80, 80),Vector2f(100,100));
+	auto meuble3 = new Entity(initRecShape(80.0f, 80.0f),Vector2f(100,100));
 	//meuble3->sprite->setOrigin(4, 4);
 	meuble3->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble3);
@@ -176,9 +176,9 @@ static void drawEntities(sf::RenderWindow &win) {
 
 void launchProj(sf::RenderWindow &win, int player) {
 
-	auto proj = new Proj(initRecShape(4,4), Vector2f(rec->getPosition().x, rec->getPosition().y), angle,true);
+	auto proj = new Proj(initRecShape(4.0f,4.0f), Vector2f(rec->getPosition().x, rec->getPosition().y), angle, true);
 	proj->sprite->setOrigin(2, 4);
-	//proj->sprite->setRotation(angleVisee);
+	proj->sprite->setRotation(angle * 180 / 3.14159265359);
 	_proj.push_back(proj);
 	shoot = false;
 }
@@ -266,7 +266,7 @@ int main()
 					}
 				}
 
-				if (event.joystickMove.joystickId == 1) {
+				/*if (event.joystickMove.joystickId == 1) {
 					if (event.joystickMove.axis == sf::Joystick::X)
 					{
 						Xjoy1 = event.joystickMove.position;
@@ -285,7 +285,7 @@ int main()
 					if (event.joystickMove.axis == sf::Joystick::Z) {
 						Zjoy1 = event.joystickMove.position;
 					}
-				}
+				}*/
 		
 				break;
 
@@ -360,7 +360,7 @@ int main()
 
 			////////////////////////////////////
 
-			if (Xjoy1 > 15 || Xjoy1 < -15)
+			/*if (Xjoy1 > 15 || Xjoy1 < -15)
 				shPos.x += Xjoy1 * JoySpeed;
 
 			if (Yjoy1 > 15 || Yjoy1 < -15)
@@ -372,7 +372,7 @@ int main()
 			}
 			else if (Ujoy1 == 0 || Vjoy1 == 0)
 			{
-				//angleVisee1 = lastRot;
+				angleVisee1 = lastRot;
 			}
 
 			if (Zjoy1 > 80 || Zjoy1 < -80 && Zjoy1 != 100 && Zjoy1 != -100)
@@ -381,7 +381,7 @@ int main()
 					launchProj(window, 1);
 			}
 
-			if (Zjoy1 < 25 && Zjoy1 > -25) shoot = true;
+			if (Zjoy1 < 25 && Zjoy1 > -25) shoot = true;*/
 							
 
 #pragma endregion			
@@ -418,22 +418,24 @@ int main()
 			if (_proj[i]->isProj)
 			{	
 				_proj[i]->move();
-				
+			}			
+			for (int j = 0; j < meuble.size(); j++) {
+
+				if (i != j && _proj[i]->box.intersects(meuble[j]->box))
+				{
+					printf("coll");
+					_proj[i]->coll(meuble[j]);
+				}
 			}
-			
 		}
 
-		/*for (int j = 0; j < meuble.size(); j++) {
 
-			if (_proj[i]->sprite->getGlobalBounds().intersects(meuble[j]->sprite->getGlobalBounds()) && i != j)
-			{
-				_proj[i]->coll(meuble[i]->sprite->getPosition().x, meuble[i]->sprite->getPosition().y, meuble[j]);
-			}
-		}*/
-		drawEntities(window);			
-		
 		for (int i = 0; i < 2; i++)
 			drawChar(window, i);
+		
+		drawEntities(window);			
+		
+	
 
 		window.display(); //dessine & attends la vsync
 

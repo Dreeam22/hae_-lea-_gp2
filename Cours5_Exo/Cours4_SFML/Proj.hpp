@@ -38,6 +38,6 @@ public:
 
 	void move();
 
-	void coll(float posXProj, float posYProj, Entity* meuble);
+	void coll(Entity* meuble);
 
 };
