@@ -10,24 +10,23 @@
 
 using namespace sf;
 
-static RectangleShape *rec = nullptr;
-static RectangleShape *rec2 = nullptr;
+//static RectangleShape *rec = nullptr;
+//static RectangleShape *rec1 = nullptr;
 //static CircleShape *circ = nullptr;
-static RectangleShape *canon = nullptr;
-static RectangleShape *canon2 = nullptr;
-static Vector2f shPos;
-static Vector2f shDir;
-static Vector2f circPos;
+//static RectangleShape *canon1 = nullptr;
+static Vector2f shPos, shPos1;
+//static Vector2f circPos;
 
-float angleVisee, angleVisee1;
-float angle, angle1;
+static std::vector<float> angleVisee{ 0,0 };
+static std::vector<float> angle{ 0,0 };
+
 float Xjoy0 = 0, Yjoy0 = 0, Ujoy0 = 0, Vjoy0 = 0, Zjoy0 = 0; //J1
 float Xjoy1 = 0, Yjoy1 = 0, Ujoy1 = 0, Vjoy1 = 0, Zjoy1 = 0; //J2
 
 int squareSpeed = 3;
 
-float JoySpeed = 0.1f;
-bool shoot = false;
+float JoySpeed = 0.1f, JoySpeed1 = 0.1f;
+bool shoot = false, shoot1 = false;;
 
 RectangleShape *initRecShape(float x, float y) {
 	auto _rectangle = new RectangleShape(Vector2f(x, y));
@@ -75,76 +74,53 @@ float rd() {
 
 static std::vector<Entity*> meuble;
 static std::vector<Proj*> _proj;
-
+static std::vector<Entity*> players;
 
 
 
 static void initChar()
 {
 #pragma region initChar1
-	rec = new RectangleShape(Vector2f(16, 16));
-	rec->setOrigin(8, 8);
-	rec->setPosition(shPos.x = 400, shPos.y = 400);
-	rec->setFillColor(sf::Color(0xFF95D0ff));
-	rec->setOutlineColor(sf::Color(0xFFBB4Dff));
-	rec->setOutlineThickness(2);
 
-	canon = new RectangleShape(Vector2f(8, 24));
-	canon->setOrigin(4, 4);
-	canon->setPosition(shPos.x = 400, shPos.y = 400);
-	canon->setRotation(90);
-	canon->setFillColor(sf::Color(0x4EEB83ff));
-	canon->setOutlineColor(sf::Color(0x000000ff));
-	canon->setOutlineThickness(1);
+	auto rec = new Entity(initRecShape(16,16), Vector2f(shPos.x = 400, shPos.y = 400));
+	rec->sprite->setOrigin(8, 8);
+	rec->sprite->setFillColor(sf::Color(0xFF95D0ff));
+	rec->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
+	rec->sprite->setOutlineThickness(2);
+
+	auto canon = new Entity(initRecShape(8, 24), Vector2f(shPos.x, shPos.y));
+	canon->sprite->setOrigin(4, 4);
+	canon->sprite->setRotation(90);
+	canon->sprite->setFillColor(sf::Color(0x4EEB83ff));
+	canon->sprite->setOutlineColor(sf::Color(0x000000ff));
+	canon->sprite->setOutlineThickness(1);
+
+	
 #pragma endregion
 	
 #pragma region initChar2
-	rec2 = new RectangleShape(Vector2f(16, 16));
-	rec2->setOrigin(8, 8);
-	rec2->setPosition(shPos.x = 600, shPos.y = 600);
-	rec2->setFillColor(sf::Color::Red);
-	rec2->setOutlineColor(sf::Color(0xFFBB4Dff));
-	rec2->setOutlineThickness(2);
+	auto rec1 = new Entity(initRecShape(16, 16), Vector2f(shPos1.x = 600, shPos1.y = 600));
+	rec1->sprite->setOrigin(8, 8);
+	rec1->sprite->setFillColor(sf::Color::Red);
+	rec1->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
+	rec1->sprite->setOutlineThickness(2);
 
-	canon2 = new RectangleShape(Vector2f(8, 24));
-	canon2->setOrigin(4, 4);
-	canon2->setPosition(shPos.x = 600, shPos.y = 600);
-	canon2->setRotation(90);
-	canon2->setFillColor(sf::Color::Blue);
-	canon2->setOutlineColor(sf::Color(0x000000ff));
-	canon2->setOutlineThickness(1);
+	auto canon1 = new Entity(initRecShape(8, 24), Vector2f(shPos1.x, shPos1.y));
+	canon1->sprite->setOrigin(4, 4);
+	canon1->sprite->setRotation(90);
+	canon1->sprite->setFillColor(sf::Color::Blue);
+	canon1->sprite->setOutlineColor(sf::Color(0x000000ff));
+	canon1->sprite->setOutlineThickness(1);
+
+
+	meuble.push_back(rec);
+	meuble.push_back(rec1);
+	meuble.push_back(canon);
+	meuble.push_back(canon1);
 #pragma endregion
-	/*circ = new CircleShape(8.f);
-	circ->setOrigin(-80, -80);
-	circ->setPosition(shPos.x = 500, shPos.y = 400);
-	circ->setFillColor(sf::Color(0x4EEB83ff));
-	circ->setOutlineColor(sf::Color(0x000000ff));
-	circ->setOutlineThickness(1);*/
-
 	
 }
 
-static void drawChar(sf::RenderWindow &win, int player)
-{
-	/*if (rec == nullptr) rec = new sf::RectangleShape(Vector2f(16, 16));
-	rec->setOrigin(16, 16);
-	rec->setFillColor(sf::Color(0xFF95D0ff));
-	rec->setOutlineColor(sf::Color(0xFFBB4Dff));
-	rec->setOutlineThickness(2);*/
-	
-
-	/*if (circ == nullptr) circ = new sf::CircleShape(8.f);
-	circ->setOrigin(rec->getPosition().x, rec->getPosition().y);
-	circ->setFillColor(sf::Color(0x4EEB83ff));
-	circ->setOutlineColor(sf::Color(0x000000ff));
-	circ->setOutlineThickness(1);*/
-	//win.draw(*circ);
-
-	player == 0 ? win.draw(*rec), win.draw(*canon) : win.draw(*rec2), win.draw(*canon2);
-	/*win.draw(*rec);
-	win.draw(*canon);*/
-	
-}
 
 static void initEntities() {
 	auto meuble1 = new Entity(initRecShape(80.0f,80.0f), Vector2f(0,0));
@@ -176,11 +152,10 @@ static void drawEntities(sf::RenderWindow &win) {
 
 void launchProj(sf::RenderWindow &win, int player) {
 
-	auto proj = new Proj(initRecShape(4.0f,4.0f), Vector2f(rec->getPosition().x, rec->getPosition().y), angle, true);
+	auto proj = new Proj(initRecShape(4.0f,4.0f), Vector2f(meuble[player]->sprite->getPosition().x, meuble[player]->sprite->getPosition().y), angle[player], true);
 	proj->sprite->setOrigin(2, 4);
-	proj->sprite->setRotation(angle * 180 / 3.14159265359);
+	proj->sprite->setRotation(angle[player] * 180 / 3.14159265359);
 	_proj.push_back(proj);
-	shoot = false;
 }
 
 
@@ -266,7 +241,7 @@ int main()
 					}
 				}
 
-				/*if (event.joystickMove.joystickId == 1) {
+				if (event.joystickMove.joystickId == 1) {
 					if (event.joystickMove.axis == sf::Joystick::X)
 					{
 						Xjoy1 = event.joystickMove.position;
@@ -285,7 +260,7 @@ int main()
 					if (event.joystickMove.axis == sf::Joystick::Z) {
 						Zjoy1 = event.joystickMove.position;
 					}
-				}*/
+				}
 		
 				break;
 
@@ -332,7 +307,8 @@ int main()
 				break;
 			}
 
-			float lastRot = canon->getRotation();
+			float lastRot = meuble[2]->sprite->getRotation();
+			float lastRot1 = meuble[3]->sprite->getRotation();
 #pragma region deadzone
 
 			if (Xjoy0 > 15 || Xjoy0 < -15) 
@@ -342,61 +318,65 @@ int main()
 				shPos.y += Yjoy0 * JoySpeed;
 
 			if (Ujoy0 > 50 || Ujoy0 < -50 || Vjoy0 > 50 || Vjoy0 < -50) {	
-				angle = atan2(Vjoy0, Ujoy0);
-				angleVisee = atan2(Ujoy0, Vjoy0) * 180 / 3.14159265359;
+				angle[0] = atan2(Vjoy0, Ujoy0);
+				angleVisee[0] = atan2(Ujoy0, Vjoy0) * 180 / 3.14159265359;
 			}
 			else if (Ujoy0 == 0 || Vjoy0 == 0)
 			{
-				angleVisee = lastRot;
+				angleVisee[0] = lastRot;
 			}
 
-			if (Zjoy0 > 80 || Zjoy0 < -80 && Zjoy0 != 100 && Zjoy0 != -100)
+			if ((Zjoy0 > 80 || Zjoy0 < -80) && Zjoy0 != 100 && Zjoy0 != -100 && !shoot)
 			{
-				if (shoot == true)
-					launchProj(window, 0);
+				shoot = true;
+				launchProj(window, 0);
 			}
+			else if ((Zjoy0 < 20 && Zjoy0 > -20) && shoot) shoot = false;
 			
-			if (Zjoy0 < 25 && Zjoy0 > -25) shoot = true;
 
 			////////////////////////////////////
 
-			/*if (Xjoy1 > 15 || Xjoy1 < -15)
-				shPos.x += Xjoy1 * JoySpeed;
+			if (Xjoy1 > 15 || Xjoy1 < -15)
+				shPos1.x += Xjoy1 * JoySpeed1;
 
 			if (Yjoy1 > 15 || Yjoy1 < -15)
-				shPos.y += Yjoy1 * JoySpeed;
+				shPos1.y += Yjoy1 * JoySpeed1;
 
 			if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {
-				angle1 = atan2(Vjoy1, Ujoy1);
-				angleVisee1 = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
+				angle[1] = atan2(Vjoy1, Ujoy1);
+				angleVisee[1] = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
 			}
 			else if (Ujoy1 == 0 || Vjoy1 == 0)
 			{
-				angleVisee1 = lastRot;
+				angleVisee[1] = lastRot1;
 			}
 
-			if (Zjoy1 > 80 || Zjoy1 < -80 && Zjoy1 != 100 && Zjoy1 != -100)
+			if ((Zjoy1 > 80 || Zjoy1 < -80) && Zjoy1 != 100 && Zjoy1 != -100 && !shoot1)
 			{
-				if (shoot == true)
-					launchProj(window, 1);
+				shoot1 = true;
+				launchProj(window, 1);
 			}
-
-			if (Zjoy1 < 25 && Zjoy1 > -25) shoot = true;*/
+			else if ((Zjoy1 < 20 && Zjoy1 > -20) && shoot1) shoot1 = false;
 							
 
 #pragma endregion			
 			
-			Vector2f lastGoodPos = rec->getPosition();			
+			Vector2f lastGoodPos = meuble[0]->sprite->getPosition();
+			Vector2f lastGoodPos1 = meuble[1]->sprite->getPosition();
 		
-			rec->setPosition(shPos);					
+			meuble[0]->sprite->setPosition(shPos);
+			meuble[1]->sprite->setPosition(shPos1);
 
-			canon->setPosition(shPos);
-			canon->setRotation(-angleVisee);
+			meuble[2]->sprite->setPosition(shPos);
+			meuble[2]->sprite->setRotation(-angleVisee[0]);
+
+			meuble[3]->sprite->setPosition(shPos1);
+			meuble[3]->sprite->setRotation(-angleVisee[1]);
 
 
 			for (Entity * ent : meuble)
 			{
-				if (rec->getGlobalBounds().intersects(ent->sprite->getGlobalBounds()) == true) {
+				if (ent != meuble[0] && ent != meuble[2] && meuble[0]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
 					JoySpeed = 0.f;
 					shPos.x = lastGoodPos.x;
 					shPos.y = lastGoodPos.y;
@@ -404,6 +384,15 @@ int main()
 				}
 				else
 					JoySpeed = 0.1f;
+
+				if (ent != meuble[1] && ent != meuble[3] && meuble[1]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
+					JoySpeed1 = 0.f;
+					shPos1.x = lastGoodPos1.x;
+					shPos1.y = lastGoodPos1.y;
+					break;
+				}
+				else
+					JoySpeed1 = 0.1f;
 
 			}
 		}
@@ -428,14 +417,8 @@ int main()
 				}
 			}
 		}
-
-
-		for (int i = 0; i < 2; i++)
-			drawChar(window, i);
-		
-		drawEntities(window);			
-		
 	
+		drawEntities(window);			
 
 		window.display(); //dessine & attends la vsync
 
