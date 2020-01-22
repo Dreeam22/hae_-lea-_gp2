@@ -5,26 +5,35 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include "Lib.hpp"
-#include <Box2D/Box2D.h>
+#include "Entity.hpp"
+#include "Proj.hpp"
 
 using namespace sf;
 
 static RectangleShape *rec = nullptr;
-static CircleShape *circ = nullptr;
+static RectangleShape *rec2 = nullptr;
+//static CircleShape *circ = nullptr;
 static RectangleShape *canon = nullptr;
+static RectangleShape *canon2 = nullptr;
 static Vector2f shPos;
 static Vector2f shDir;
 static Vector2f circPos;
 
-float angleVisee;
-float angle;
-float Xjoy1 = 0, Yjoy1 = 0, Ujoy1 = 0, Vjoy1 = 0, Zjoy1 = 0;
+float angleVisee, angleVisee1;
+float angle, angle1;
+float Xjoy0 = 0, Yjoy0 = 0, Ujoy0 = 0, Vjoy0 = 0, Zjoy0 = 0; //J1
+float Xjoy1 = 0, Yjoy1 = 0, Ujoy1 = 0, Vjoy1 = 0, Zjoy1 = 0; //J2
 
 int squareSpeed = 3;
 
 float JoySpeed = 0.1f;
-
 bool shoot = false;
+
+RectangleShape *initRecShape(int x, int y) {
+	auto _rectangle = new RectangleShape(Vector2f(x, y));
+	return _rectangle;
+}
+
 float lerp(float a, float b, float r) {
 	return a + (b - a) * r;
 }
@@ -63,60 +72,16 @@ float rd() {
 	}
 }*/
 
-class Entity {
-public:
 
-	sf::Shape 	*sprite = nullptr; // pour le rendu
-	sf::FloatRect		box;//pour les collisions
-	Vector2f dir;
-	float x, y;
-	bool isProj = false;
-	
-	Entity(sf::Shape *forme, sf::Vector2f Pos, float angle, bool _isProj) {
-		this->sprite = forme;
-		this->sprite->setPosition(Pos.x, Pos.y);
 
-		this->box = forme->getGlobalBounds();
-
-		this->dir = Vector2f(cos(angle), sin(angle));
-		this->isProj = _isProj;
-
-		this->x = rec->getPosition().x;
-		this->y = rec->getPosition().y;
-
-	}
-
-	~Entity()
-	{
-
-	}
-	void _draw(sf::RenderWindow &win) {
-		win.draw(*sprite);
-	}
-
-	void move() {
-		x += dir.x;
-		y += dir.y;
-		sprite->setPosition(x,y);
-	}
-
-	void coll(float posXProj, float posYProj, Entity* meuble) {
-
-		auto meublePos = meuble->sprite->getPosition();
-		auto meubleOff = meuble->box;
-		if (posXProj < meublePos.x || posXProj > meublePos.x + meubleOff.width) { dir.x *= -1; }
-		else if (posYProj < meublePos.y || posYProj > meublePos.y + meubleOff.height ) { dir.y *= -1; }
-		
-	}
-
-};
-
+static std::vector<Proj*> _proj;
 static std::vector<Entity*> meuble;
 
 
 
-static void initRec()
+static void initChar()
 {
+#pragma region initChar1
 	rec = new RectangleShape(Vector2f(16, 16));
 	rec->setOrigin(8, 8);
 	rec->setPosition(shPos.x = 400, shPos.y = 400);
@@ -124,30 +89,49 @@ static void initRec()
 	rec->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec->setOutlineThickness(2);
 
-	circ = new CircleShape(8.f);
-	circ->setOrigin(-80, -80);
-	circ->setPosition(shPos.x = 500, shPos.y = 400);
-	circ->setFillColor(sf::Color(0x4EEB83ff));
-	circ->setOutlineColor(sf::Color(0x000000ff));
-	circ->setOutlineThickness(1);
-
 	canon = new RectangleShape(Vector2f(8, 24));
 	canon->setOrigin(4, 4);
-	canon->setPosition(shPos.x = 500, shPos.y = 400);
+	canon->setPosition(shPos.x = 400, shPos.y = 400);
 	canon->setRotation(90);
 	canon->setFillColor(sf::Color(0x4EEB83ff));
 	canon->setOutlineColor(sf::Color(0x000000ff));
 	canon->setOutlineThickness(1);
+#pragma endregion
+	
+#pragma region initChar2
+	rec2 = new RectangleShape(Vector2f(16, 16));
+	rec2->setOrigin(8, 8);
+	rec2->setPosition(shPos.x = 600, shPos.y = 600);
+	rec2->setFillColor(sf::Color::Red);
+	rec2->setOutlineColor(sf::Color(0xFFBB4Dff));
+	rec2->setOutlineThickness(2);
+
+	canon2 = new RectangleShape(Vector2f(8, 24));
+	canon2->setOrigin(4, 4);
+	canon2->setPosition(shPos.x = 600, shPos.y = 600);
+	canon2->setRotation(90);
+	canon2->setFillColor(sf::Color::Blue);
+	canon2->setOutlineColor(sf::Color(0x000000ff));
+	canon2->setOutlineThickness(1);
+#pragma endregion
+	/*circ = new CircleShape(8.f);
+	circ->setOrigin(-80, -80);
+	circ->setPosition(shPos.x = 500, shPos.y = 400);
+	circ->setFillColor(sf::Color(0x4EEB83ff));
+	circ->setOutlineColor(sf::Color(0x000000ff));
+	circ->setOutlineThickness(1);*/
+
+	
 }
 
-static void drawMovingRec(sf::RenderWindow &win)
+static void drawChar(sf::RenderWindow &win, int player)
 {
 	/*if (rec == nullptr) rec = new sf::RectangleShape(Vector2f(16, 16));
 	rec->setOrigin(16, 16);
 	rec->setFillColor(sf::Color(0xFF95D0ff));
 	rec->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec->setOutlineThickness(2);*/
-	win.draw(*rec);
+	
 
 	/*if (circ == nullptr) circ = new sf::CircleShape(8.f);
 	circ->setOrigin(rec->getPosition().x, rec->getPosition().y);
@@ -155,33 +139,25 @@ static void drawMovingRec(sf::RenderWindow &win)
 	circ->setOutlineColor(sf::Color(0x000000ff));
 	circ->setOutlineThickness(1);*/
 	//win.draw(*circ);
-	win.draw(*canon);
+
+	player == 0 ? win.draw(*rec), win.draw(*canon) : win.draw(*rec2), win.draw(*canon2);
+	/*win.draw(*rec);
+	win.draw(*canon);*/
 	
 }
 
-CircleShape *initCircShape(float r) {
-	auto _circle = new CircleShape(r);
-	return _circle;
-}
-
-RectangleShape *initRecShape(int x, int y) {
-	auto _rectangle = new RectangleShape(Vector2f(x, y));
-	return _rectangle;
-}
-
-
 static void initEntities() {
-	auto meuble1 = new Entity(initRecShape(80,80), Vector2f(0,0),0,false);
+	auto meuble1 = new Entity(initRecShape(80,80), Vector2f(0,0));
 	//meuble1->sprite->setOrigin(4, 4);
 	meuble1->sprite->setFillColor(sf::Color(0xEB78FFff));	
 	meuble.push_back(meuble1);
 
-	auto meuble2 = new Entity(initRecShape(80, 80), Vector2f(800, 500),0,false);
+	auto meuble2 = new Entity(initRecShape(80, 80), Vector2f(800, 500));
 	//meuble2->sprite->setOrigin(4, 4);
 	meuble2->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble2);
 
-	auto meuble3 = new Entity(initRecShape(80, 80),Vector2f(100,100),0,false);
+	auto meuble3 = new Entity(initRecShape(80, 80),Vector2f(100,100));
 	//meuble3->sprite->setOrigin(4, 4);
 	meuble3->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble3);
@@ -194,14 +170,16 @@ static void drawEntities(sf::RenderWindow &win) {
 	for (int i = 0; i <meuble.size(); i++) {
 		meuble[i]->_draw(win);		
 	}	
+
+	for (int i = 0; i < _proj.size(); i++) _proj[i]->_draw(win);
 }
 
-void launchProj(sf::RenderWindow &win) {
+void launchProj(sf::RenderWindow &win, int player) {
 
-	auto proj = new Entity(initRecShape(4,4), Vector2f(rec->getPosition().x, rec->getPosition().y), angle,true);
+	auto proj = new Proj(initRecShape(4,4), Vector2f(rec->getPosition().x, rec->getPosition().y), angle,true);
 	proj->sprite->setOrigin(2, 4);
 	//proj->sprite->setRotation(angleVisee);
-	meuble.push_back(proj);
+	_proj.push_back(proj);
 	shoot = false;
 }
 
@@ -243,7 +221,7 @@ int main()
 	
 	int every = 0;	
 
-	initRec();
+	initChar();
 	initEntities();
 
 
@@ -270,9 +248,30 @@ int main()
 				if (event.joystickMove.joystickId == 0){
 					if (event.joystickMove.axis == sf::Joystick::X)
 					{
-						Xjoy1 = event.joystickMove.position;					
+						Xjoy0 = event.joystickMove.position;					
 					}
 					if (event.joystickMove.axis == sf::Joystick::Y) {												
+						Yjoy0 = event.joystickMove.position;
+					}
+					if (event.joystickMove.axis == sf::Joystick::U)
+					{
+						Ujoy0 = event.joystickMove.position;
+					}
+					if (event.joystickMove.axis == sf::Joystick::V)
+					{
+						Vjoy0 = event.joystickMove.position;
+					}
+					if (event.joystickMove.axis == sf::Joystick::Z) {
+						Zjoy0 = event.joystickMove.position;
+					}
+				}
+
+				if (event.joystickMove.joystickId == 1) {
+					if (event.joystickMove.axis == sf::Joystick::X)
+					{
+						Xjoy1 = event.joystickMove.position;
+					}
+					if (event.joystickMove.axis == sf::Joystick::Y) {
 						Yjoy1 = event.joystickMove.position;
 					}
 					if (event.joystickMove.axis == sf::Joystick::U)
@@ -287,7 +286,6 @@ int main()
 						Zjoy1 = event.joystickMove.position;
 					}
 				}
-
 		
 				break;
 
@@ -337,27 +335,52 @@ int main()
 			float lastRot = canon->getRotation();
 #pragma region deadzone
 
-			if (Xjoy1 > 15 || Xjoy1 < -15) 
-				shPos.x += Xjoy1 * JoySpeed;			
+			if (Xjoy0 > 15 || Xjoy0 < -15) 
+				shPos.x += Xjoy0 * JoySpeed;			
+
+			if (Yjoy0 > 15 || Yjoy0 < -15)
+				shPos.y += Yjoy0 * JoySpeed;
+
+			if (Ujoy0 > 50 || Ujoy0 < -50 || Vjoy0 > 50 || Vjoy0 < -50) {	
+				angle = atan2(Vjoy0, Ujoy0);
+				angleVisee = atan2(Ujoy0, Vjoy0) * 180 / 3.14159265359;
+			}
+			else if (Ujoy0 == 0 || Vjoy0 == 0)
+			{
+				angleVisee = lastRot;
+			}
+
+			if (Zjoy0 > 80 || Zjoy0 < -80 && Zjoy0 != 100 && Zjoy0 != -100)
+			{
+				if (shoot == true)
+					launchProj(window, 0);
+			}
+			
+			if (Zjoy0 < 25 && Zjoy0 > -25) shoot = true;
+
+			////////////////////////////////////
+
+			if (Xjoy1 > 15 || Xjoy1 < -15)
+				shPos.x += Xjoy1 * JoySpeed;
 
 			if (Yjoy1 > 15 || Yjoy1 < -15)
 				shPos.y += Yjoy1 * JoySpeed;
 
-			if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {	
-				angle = atan2(Vjoy1, Ujoy1);
-				angleVisee = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
+			if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {
+				angle1 = atan2(Vjoy1, Ujoy1);
+				angleVisee1 = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
 			}
 			else if (Ujoy1 == 0 || Vjoy1 == 0)
 			{
-				angleVisee = lastRot;
+				//angleVisee1 = lastRot;
 			}
 
 			if (Zjoy1 > 80 || Zjoy1 < -80 && Zjoy1 != 100 && Zjoy1 != -100)
 			{
 				if (shoot == true)
-					launchProj(window);
+					launchProj(window, 1);
 			}
-			
+
 			if (Zjoy1 < 25 && Zjoy1 > -25) shoot = true;
 							
 
@@ -365,18 +388,15 @@ int main()
 			
 			Vector2f lastGoodPos = rec->getPosition();			
 		
-			rec->setPosition(shPos);		
-			circ->setPosition(shPos);
+			rec->setPosition(shPos);					
 
 			canon->setPosition(shPos);
 			canon->setRotation(-angleVisee);
 
-			circ->setRotation(-angleVisee);
 
 			for (Entity * ent : meuble)
 			{
 				if (rec->getGlobalBounds().intersects(ent->sprite->getGlobalBounds()) == true) {
-					//printf("coll ");
 					JoySpeed = 0.f;
 					shPos.x = lastGoodPos.x;
 					shPos.y = lastGoodPos.y;
@@ -391,35 +411,29 @@ int main()
 
 		window.clear(); // nettoie la fenêtre
 		
-		//window.draw(myFPScounter); // on demande le dessin d'une forme
-		//window.draw(myMousePos);
+		window.draw(myFPScounter); // on demande le dessin d'une forme
 		
-		for (int i = 0; i < meuble.size(); i++)
+		for (int i = 0; i < _proj.size(); i++)
 		{	
-			if (meuble[i]->isProj)
+			if (_proj[i]->isProj)
 			{	
-				meuble[i]->move();
-				for (int j = 0; j < meuble.size(); j++) {
-
-					if (meuble[i]->sprite->getGlobalBounds().intersects(meuble[j]->sprite->getGlobalBounds()) && i != j && !meuble[j]->isProj)
-					{
-						printf("coll");
-						meuble[i]->coll(meuble[i]->sprite->getPosition().x, meuble[i]->sprite->getPosition().y, meuble[j]);
-					}
-				}
+				_proj[i]->move();
+				
 			}
 			
 		}
 
+		/*for (int j = 0; j < meuble.size(); j++) {
+
+			if (_proj[i]->sprite->getGlobalBounds().intersects(meuble[j]->sprite->getGlobalBounds()) && i != j)
+			{
+				_proj[i]->coll(meuble[i]->sprite->getPosition().x, meuble[i]->sprite->getPosition().y, meuble[j]);
+			}
+		}*/
 		drawEntities(window);			
 		
-
-		/*sf::Vertex line[] = {
-		sf::Vertex(sf::Vector2f(rec->getPosition())),
-		sf::Vertex(sf::Vector2f(circ->getPosition()))
-		};
-		window.draw(line, 2, sf::Lines);*/
-		drawMovingRec(window);
+		for (int i = 0; i < 2; i++)
+			drawChar(window, i);
 
 		window.display(); //dessine & attends la vsync
 
