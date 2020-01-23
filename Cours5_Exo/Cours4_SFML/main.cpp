@@ -10,13 +10,9 @@
 
 using namespace sf;
 
-//static RectangleShape *rec = nullptr;
-//static RectangleShape *rec1 = nullptr;
-//static CircleShape *circ = nullptr;
-//static RectangleShape *canon1 = nullptr;
 static Vector2f shPos, shPos1;
-//static Vector2f circPos;
-
+static Vector2f lastGoodPos;
+static Vector2f lastGoodPos1;
 static std::vector<float> angleVisee{ 0,0 };
 static std::vector<float> angle{ 0,0 };
 
@@ -87,6 +83,7 @@ static void initChar()
 	rec->sprite->setFillColor(sf::Color(0xFF95D0ff));
 	rec->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec->sprite->setOutlineThickness(2);
+	rec->isPlayer = true;
 
 	auto canon = new Entity(initRecShape(8, 24), Vector2f(shPos.x, shPos.y));
 	canon->sprite->setOrigin(4, 4);
@@ -94,7 +91,7 @@ static void initChar()
 	canon->sprite->setFillColor(sf::Color(0x4EEB83ff));
 	canon->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon->sprite->setOutlineThickness(1);
-
+	canon->isCanon = true;
 	
 #pragma endregion
 	
@@ -104,14 +101,15 @@ static void initChar()
 	rec1->sprite->setFillColor(sf::Color::Red);
 	rec1->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec1->sprite->setOutlineThickness(2);
+	rec1->isPlayer = true;
 
 	auto canon1 = new Entity(initRecShape(8, 24), Vector2f(shPos1.x, shPos1.y));
-	canon1->sprite->setOrigin(4, 4);
+	canon1->sprite->setOrigin(4,4);
 	canon1->sprite->setRotation(90);
 	canon1->sprite->setFillColor(sf::Color::Blue);
 	canon1->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon1->sprite->setOutlineThickness(1);
-
+	canon1->isCanon = true;
 
 	meuble.push_back(rec);
 	meuble.push_back(rec1);
@@ -152,7 +150,10 @@ static void drawEntities(sf::RenderWindow &win) {
 
 void launchProj(sf::RenderWindow &win, int player) {
 
-	auto proj = new Proj(initRecShape(4.0f,4.0f), Vector2f(meuble[player]->sprite->getPosition().x, meuble[player]->sprite->getPosition().y), angle[player], true);
+	auto proj = new Proj(initRecShape(4.0f,4.0f), 
+		Vector2f(meuble[player]->sprite->getPosition().x + cos(angle[player]) *30, 
+			meuble[player]->sprite->getPosition().y + sin(angle[player]) *30), 
+			angle[player], true);
 	proj->sprite->setOrigin(2, 4);
 	proj->sprite->setRotation(angle[player] * 180 / 3.14159265359);
 	_proj.push_back(proj);
@@ -307,118 +308,140 @@ int main()
 				break;
 			}
 
-			float lastRot = meuble[2]->sprite->getRotation();
-			float lastRot1 = meuble[3]->sprite->getRotation();
+		}
+
+		float lastRot = meuble[2]->sprite->getRotation();
+		float lastRot1 = meuble[3]->sprite->getRotation();
 #pragma region deadzone
 
-			if (Xjoy0 > 15 || Xjoy0 < -15) 
-				shPos.x += Xjoy0 * JoySpeed;			
+		if (Xjoy0 > 15 || Xjoy0 < -15)
+			shPos.x += Xjoy0 * JoySpeed;
 
-			if (Yjoy0 > 15 || Yjoy0 < -15)
-				shPos.y += Yjoy0 * JoySpeed;
+		if (Yjoy0 > 15 || Yjoy0 < -15)
+			shPos.y += Yjoy0 * JoySpeed;
 
-			if (Ujoy0 > 50 || Ujoy0 < -50 || Vjoy0 > 50 || Vjoy0 < -50) {	
-				angle[0] = atan2(Vjoy0, Ujoy0);
-				angleVisee[0] = atan2(Ujoy0, Vjoy0) * 180 / 3.14159265359;
-			}
-			else if (Ujoy0 == 0 || Vjoy0 == 0)
-			{
-				angleVisee[0] = lastRot;
-			}
+		if (Ujoy0 > 50 || Ujoy0 < -50 || Vjoy0 > 50 || Vjoy0 < -50) {
+			angle[0] = atan2(Vjoy0, Ujoy0);
+			angleVisee[0] = atan2(Ujoy0, Vjoy0) * 180 / 3.14159265359;
+		}
+		else if (Ujoy0 == 0 || Vjoy0 == 0)
+		{
+			angleVisee[0] = lastRot;
+		}
 
-			if ((Zjoy0 > 80 || Zjoy0 < -80) && Zjoy0 != 100 && Zjoy0 != -100 && !shoot)
-			{
-				shoot = true;
-				launchProj(window, 0);
-			}
-			else if ((Zjoy0 < 20 && Zjoy0 > -20) && shoot) shoot = false;
-			
+		if ((Zjoy0 > 80 || Zjoy0 < -80) && Zjoy0 != 100 && Zjoy0 != -100 && !shoot && meuble[2]->isCanon)
+		{
+			shoot = true;
+			launchProj(window, 0);
+		}
+		else if ((Zjoy0 < 20 && Zjoy0 > -20) && shoot) shoot = false;
 
-			////////////////////////////////////
 
-			if (Xjoy1 > 15 || Xjoy1 < -15)
-				shPos1.x += Xjoy1 * JoySpeed1;
+		////////////////////////////////////
 
-			if (Yjoy1 > 15 || Yjoy1 < -15)
-				shPos1.y += Yjoy1 * JoySpeed1;
+		if (Xjoy1 > 15 || Xjoy1 < -15)
+			shPos1.x += Xjoy1 * JoySpeed1;
 
-			if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {
-				angle[1] = atan2(Vjoy1, Ujoy1);
-				angleVisee[1] = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
-			}
-			else if (Ujoy1 == 0 || Vjoy1 == 0)
-			{
-				angleVisee[1] = lastRot1;
-			}
+		if (Yjoy1 > 15 || Yjoy1 < -15)
+			shPos1.y += Yjoy1 * JoySpeed1;
 
-			if ((Zjoy1 > 80 || Zjoy1 < -80) && Zjoy1 != 100 && Zjoy1 != -100 && !shoot1)
-			{
-				shoot1 = true;
-				launchProj(window, 1);
-			}
-			else if ((Zjoy1 < 20 && Zjoy1 > -20) && shoot1) shoot1 = false;
-							
+		if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {
+			angle[1] = atan2(Vjoy1, Ujoy1);
+			angleVisee[1] = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
+		}
+		else if (Ujoy1 == 0 || Vjoy1 == 0)
+		{
+			angleVisee[1] = lastRot1;
+		}
+
+		if ((Zjoy1 > 80 || Zjoy1 < -80) && Zjoy1 != 100 && Zjoy1 != -100 && !shoot1 && meuble[3]->isCanon)
+		{
+			shoot1 = true;
+			launchProj(window, 1);
+		}
+		else if ((Zjoy1 < 20 && Zjoy1 > -20) && shoot1) shoot1 = false;
+
 
 #pragma endregion			
-			
-			Vector2f lastGoodPos = meuble[0]->sprite->getPosition();
-			Vector2f lastGoodPos1 = meuble[1]->sprite->getPosition();
-		
-			meuble[0]->sprite->setPosition(shPos);
-			meuble[1]->sprite->setPosition(shPos1);
 
-			meuble[2]->sprite->setPosition(shPos);
-			meuble[2]->sprite->setRotation(-angleVisee[0]);
-
-			meuble[3]->sprite->setPosition(shPos1);
-			meuble[3]->sprite->setRotation(-angleVisee[1]);
-
-
-			for (Entity * ent : meuble)
+		for (int i = 0; i < 4; i++)
+		{
+			if (meuble[i]->isPlayer)
 			{
-				if (ent != meuble[0] && ent != meuble[2] && meuble[0]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
-					JoySpeed = 0.f;
-					shPos.x = lastGoodPos.x;
-					shPos.y = lastGoodPos.y;
-					break;
-				}
-				else
-					JoySpeed = 0.1f;
+				//Mouvements J1 et J2			
+				i == 0 ? meuble[i]->sprite->setPosition(shPos) : meuble[i]->sprite->setPosition(shPos1);
+				lastGoodPos = meuble[0]->sprite->getPosition();
+				lastGoodPos1 = meuble[1]->sprite->getPosition();
+			}
 
-				if (ent != meuble[1] && ent != meuble[3] && meuble[1]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
-					JoySpeed1 = 0.f;
-					shPos1.x = lastGoodPos1.x;
-					shPos1.y = lastGoodPos1.y;
-					break;
-				}
-				else
-					JoySpeed1 = 0.1f;
+			if (meuble[i]->isCanon)
+			{
+				meuble[2]->sprite->setPosition(shPos);				//Mouvements Canon1
+				meuble[2]->sprite->setRotation(-angleVisee[0]);
 
+				meuble[3]->sprite->setPosition(shPos1);				//Mouvements Canon2
+				meuble[3]->sprite->setRotation(-angleVisee[1]);
 			}
 		}
 
+		
+			
+
+
+#pragma region Collisions
+		for (Entity * ent : meuble)   //Collisions avec la liste d'entités
+		{
+			if (!ent->isPlayer && !ent->isCanon && meuble[0]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
+				JoySpeed = 0.f;					//J1 & Murs
+				shPos.x = lastGoodPos.x;
+				shPos.y = lastGoodPos.y;
+				break;
+			}
+			else
+				JoySpeed = 0.1f;
+
+			if (!ent->isPlayer && !ent->isCanon && meuble[1]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
+				JoySpeed1 = 0.f;
+				shPos1.x = lastGoodPos1.x;		//J2 & Murs
+				shPos1.y = lastGoodPos1.y;
+				break;
+			}
+			else
+				JoySpeed1 = 0.1f;
+		}
+
+#pragma endregion
 
 		window.clear(); // nettoie la fenêtre
 		
 		window.draw(myFPScounter); // on demande le dessin d'une forme
-		
-		for (int i = 0; i < _proj.size(); i++)
-		{	
-			if (_proj[i]->isProj)
-			{	
-				_proj[i]->move();
-			}			
-			for (int j = 0; j < meuble.size(); j++) {
 
-				if (i != j && _proj[i]->box.intersects(meuble[j]->box))
+		drawEntities(window);	
+
+		for (int i = 0; i < _proj.size(); i++)
+		{
+			_proj[i]->move();
+			for (int j = 0; j < meuble.size(); j++) {
+				if (_proj[i]->box.intersects(meuble[j]->box) && !meuble[j]->isPlayer && !meuble[j]->isCanon)
 				{
-					printf("coll");
-					_proj[i]->coll(meuble[j]);
+					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble
+				}
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
+				{
+					meuble.erase(meuble.begin() + j);
+					meuble[0]->isPlayer = false;
+					meuble[1]->isPlayer = false;
+					printf("exterminate P1 "); // P2 touché par proj
+				}
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
+				{
+					meuble.erase(meuble.begin() + j);
+					meuble[0]->isPlayer = false;
+					meuble[1]->isPlayer = false;
+					printf("exterminate P2 "); // P1 touché par proj
 				}
 			}
 		}
-	
-		drawEntities(window);			
 
 		window.display(); //dessine & attends la vsync
 
