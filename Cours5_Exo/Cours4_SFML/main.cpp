@@ -92,6 +92,7 @@ static void initChar()
 	canon->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon->sprite->setOutlineThickness(1);
 	canon->isCanon = true;
+	canon->isPlayer = true;
 	
 #pragma endregion
 	
@@ -110,6 +111,7 @@ static void initChar()
 	canon1->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon1->sprite->setOutlineThickness(1);
 	canon1->isCanon = true;
+	canon1->isPlayer = true;
 
 	meuble.push_back(rec);
 	meuble.push_back(rec1);
@@ -142,7 +144,8 @@ static void initEntities() {
 static void drawEntities(sf::RenderWindow &win) {
 
 	for (int i = 0; i <meuble.size(); i++) {
-		meuble[i]->_draw(win);		
+		if (!meuble[i]->destroyed)
+			meuble[i]->_draw(win);		
 	}	
 
 	for (int i = 0; i < _proj.size(); i++) _proj[i]->_draw(win);
@@ -329,7 +332,7 @@ int main()
 			angleVisee[0] = lastRot;
 		}
 
-		if ((Zjoy0 > 80 || Zjoy0 < -80) && Zjoy0 != 100 && Zjoy0 != -100 && !shoot && meuble[2]->isCanon)
+		if ((Zjoy0 > 80 || Zjoy0 < -80) && Zjoy0 != 100 && Zjoy0 != -100 && !shoot && !meuble[2]->destroyed)
 		{
 			shoot = true;
 			launchProj(window, 0);
@@ -354,7 +357,7 @@ int main()
 			angleVisee[1] = lastRot1;
 		}
 
-		if ((Zjoy1 > 80 || Zjoy1 < -80) && Zjoy1 != 100 && Zjoy1 != -100 && !shoot1 && meuble[3]->isCanon)
+		if ((Zjoy1 > 80 || Zjoy1 < -80) && Zjoy1 != 100 && Zjoy1 != -100 && !shoot1 && !meuble[3]->destroyed)
 		{
 			shoot1 = true;
 			launchProj(window, 1);
@@ -422,23 +425,21 @@ int main()
 		{
 			_proj[i]->move();
 			for (int j = 0; j < meuble.size(); j++) {
-				if (_proj[i]->box.intersects(meuble[j]->box) && !meuble[j]->isPlayer && !meuble[j]->isCanon)
+				if (_proj[i]->box.intersects(meuble[j]->box) && !meuble[j]->isPlayer)
 				{
 					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
 				{
-					meuble.erase(meuble.begin() + j);
-					meuble[0]->isPlayer = false;
-					meuble[1]->isPlayer = false;
-					printf("exterminate P1 "); // P2 touché par proj
+					meuble[j]->_destroy(window);
+					meuble[0]->_destroy(window);
+					printf("exterminate P1 "); // P1 touché par proj
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
 				{
-					meuble.erase(meuble.begin() + j);
-					meuble[0]->isPlayer = false;
-					meuble[1]->isPlayer = false;
-					printf("exterminate P2 "); // P1 touché par proj
+					meuble[j]->_destroy(window);
+					meuble[1]->_destroy(window);
+					printf("exterminate P2 "); // P2 touché par proj
 				}
 			}
 		}
