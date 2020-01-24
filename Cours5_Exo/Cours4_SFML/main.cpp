@@ -7,6 +7,8 @@
 #include "Lib.hpp"
 #include "Entity.hpp"
 #include "Proj.hpp"
+#include "enum.h"
+#include "Texts.hpp"
 
 using namespace sf;
 
@@ -18,11 +20,18 @@ static std::vector<float> angle{ 0,0 };
 
 float Xjoy0 = 0, Yjoy0 = 0, Ujoy0 = 0, Vjoy0 = 0, Zjoy0 = 0; //J1
 float Xjoy1 = 0, Yjoy1 = 0, Ujoy1 = 0, Vjoy1 = 0, Zjoy1 = 0; //J2
+float lastRot = 90.0f;
+float lastRot1 = 90.0f;
 
 int squareSpeed = 3;
-
 float JoySpeed = 0.1f, JoySpeed1 = 0.1f;
 bool shoot = false, shoot1 = false;;
+sf::Font *MyFont = new Font;
+//sf::Text Title, PressToStart, DescriptionTxt;
+
+GameState _gameState = MENU;
+
+sf::Texture _crackedText;
 
 RectangleShape *initRecShape(float x, float y) {
 	auto _rectangle = new RectangleShape(Vector2f(x, y));
@@ -70,24 +79,23 @@ float rd() {
 
 static std::vector<Entity*> meuble;
 static std::vector<Proj*> _proj;
-static std::vector<Entity*> players;
-
+static std::vector<Textes*> _textes;
 
 
 static void initChar()
 {
 #pragma region initChar1
 
-	auto rec = new Entity(initRecShape(16,16), Vector2f(shPos.x = 400, shPos.y = 400));
+	auto rec = new Entity(initRecShape(16,16), initRecShape(16, 16), Vector2f(shPos.x = 400, shPos.y = 400), &_crackedText);
 	rec->sprite->setOrigin(8, 8);
 	rec->sprite->setFillColor(sf::Color(0xFF95D0ff));
 	rec->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec->sprite->setOutlineThickness(2);
 	rec->isPlayer = true;
 
-	auto canon = new Entity(initRecShape(8, 24), Vector2f(shPos.x, shPos.y));
+	auto canon = new Entity(initRecShape(8, 24), initRecShape(8, 24), Vector2f(shPos.x, shPos.y), &_crackedText);
 	canon->sprite->setOrigin(4, 4);
-	canon->sprite->setRotation(90);
+	//canon->sprite->setRotation(90);
 	canon->sprite->setFillColor(sf::Color(0x4EEB83ff));
 	canon->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon->sprite->setOutlineThickness(1);
@@ -97,16 +105,16 @@ static void initChar()
 #pragma endregion
 	
 #pragma region initChar2
-	auto rec1 = new Entity(initRecShape(16, 16), Vector2f(shPos1.x = 600, shPos1.y = 600));
+	auto rec1 = new Entity(initRecShape(16, 16), initRecShape(16, 16), Vector2f(shPos1.x = 600, shPos1.y = 600), &_crackedText);
 	rec1->sprite->setOrigin(8, 8);
 	rec1->sprite->setFillColor(sf::Color::Red);
 	rec1->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec1->sprite->setOutlineThickness(2);
 	rec1->isPlayer = true;
 
-	auto canon1 = new Entity(initRecShape(8, 24), Vector2f(shPos1.x, shPos1.y));
+	auto canon1 = new Entity(initRecShape(8, 24), initRecShape(8, 24), Vector2f(shPos1.x, shPos1.y), &_crackedText);
 	canon1->sprite->setOrigin(4,4);
-	canon1->sprite->setRotation(90);
+	//canon1->sprite->setRotation(90);
 	canon1->sprite->setFillColor(sf::Color::Blue);
 	canon1->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon1->sprite->setOutlineThickness(1);
@@ -123,17 +131,17 @@ static void initChar()
 
 
 static void initEntities() {
-	auto meuble1 = new Entity(initRecShape(80.0f,80.0f), Vector2f(0,0));
+	auto meuble1 = new Entity(initRecShape(80.0f,80.0f), initRecShape(80.0f, 80.0f), Vector2f(0,0), &_crackedText);
 	//meuble1->sprite->setOrigin(4, 4);
 	meuble1->sprite->setFillColor(sf::Color(0xEB78FFff));	
 	meuble.push_back(meuble1);
 
-	auto meuble2 = new Entity(initRecShape(80.0f, 80.0f), Vector2f(800, 500));
+	auto meuble2 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(800, 500), &_crackedText);
 	//meuble2->sprite->setOrigin(4, 4);
 	meuble2->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble2);
 
-	auto meuble3 = new Entity(initRecShape(80.0f, 80.0f),Vector2f(100,100));
+	auto meuble3 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(100,100), &_crackedText);
 	//meuble3->sprite->setOrigin(4, 4);
 	meuble3->sprite->setFillColor(sf::Color(0xEB78FFff));
 	meuble.push_back(meuble3);
@@ -143,8 +151,7 @@ static void initEntities() {
 
 static void drawEntities(sf::RenderWindow &win) {
 
-	for (int i = 0; i <meuble.size(); i++) {
-		if (!meuble[i]->destroyed)
+	for (int i = 0; i <meuble.size(); i++) {		
 			meuble[i]->_draw(win);		
 	}	
 
@@ -162,7 +169,131 @@ void launchProj(sf::RenderWindow &win, int player) {
 	_proj.push_back(proj);
 }
 
+void Menu() {
+	
+	auto Title = new Textes(MyFont, 120, Vector2f(450, 0), sf::Color::White, "BREAK IT");
+	_textes.push_back(Title);
 
+	auto PTS = new Textes(MyFont, 120, Vector2f(215, 500), sf::Color::Red, "Press A to start");
+	_textes.push_back(PTS);
+
+	auto DT = new Textes(MyFont, 80, Vector2f(150, 300), sf::Color::White, "Player 1 is \t\t Player 2 is");
+	_textes.push_back(DT);
+
+}
+
+void drawMenu(RenderWindow &win) {
+	for (int i = 0; i < _textes.size(); i++) {
+		_textes[i]->_draw(win);
+	}
+}
+void Move(RenderWindow & window) {
+		//	float lastRot = meuble[2]->sprite->getRotation();
+		//	float lastRot1 = meuble[3]->sprite->getRotation();
+#pragma region deadzone
+
+			if (Xjoy0 > 15 || Xjoy0 < -15)
+				shPos.x += Xjoy0 * JoySpeed;
+
+			if (Yjoy0 > 15 || Yjoy0 < -15)
+				shPos.y += Yjoy0 * JoySpeed;
+
+			if (Ujoy0 > 50 || Ujoy0 < -50 || Vjoy0 > 50 || Vjoy0 < -50) {
+				angle[0] = atan2(Vjoy0, Ujoy0);
+				angleVisee[0] = atan2(Ujoy0, Vjoy0) * 180 / 3.14159265359;
+			}
+			else if (Ujoy0 == 0 || Vjoy0 == 0)
+			{
+				angleVisee[0] = lastRot;
+			}
+
+			if ((Zjoy0 > 80 || Zjoy0 < -80) && Zjoy0 != 100 && Zjoy0 != -100 && !shoot && meuble[2]->isCanon)
+			{
+				shoot = true;
+				launchProj(window, 0);
+			}
+			else if ((Zjoy0 < 20 && Zjoy0 > -20) && shoot) shoot = false;
+
+
+			////////////////////////////////////
+
+			if (Xjoy1 > 15 || Xjoy1 < -15)
+				shPos1.x += Xjoy1 * JoySpeed1;
+
+			if (Yjoy1 > 15 || Yjoy1 < -15)
+				shPos1.y += Yjoy1 * JoySpeed1;
+
+			if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {
+				angle[1] = atan2(Vjoy1, Ujoy1);
+				angleVisee[1] = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
+			}
+			else if (Ujoy1 == 0 || Vjoy1 == 0)
+			{
+				angleVisee[1] = lastRot1;
+			}
+
+			if ((Zjoy1 > 80 || Zjoy1 < -80) && Zjoy1 != 100 && Zjoy1 != -100 && !shoot1 && meuble[3]->isCanon)
+			{
+				shoot1 = true;
+				launchProj(window, 1);
+			}
+			else if ((Zjoy1 < 20 && Zjoy1 > -20) && shoot1) shoot1 = false;
+
+
+#pragma endregion			
+			lastGoodPos = meuble[0]->sprite->getPosition();
+			lastGoodPos1 = meuble[1]->sprite->getPosition();
+
+			for (int i = 0; i < 4; i++)
+			{
+				if (meuble[i]->isPlayer)
+				{
+					//Mouvements J1 et J2			
+					i == 0 ? meuble[i]->sprite->setPosition(shPos) : meuble[i]->sprite->setPosition(shPos1);
+					
+				}
+
+				if (meuble[i]->isCanon)
+				{
+					meuble[2]->sprite->setPosition(shPos);				//Mouvements Canon1
+					meuble[2]->sprite->setRotation(-angleVisee[0]);
+
+					meuble[3]->sprite->setPosition(shPos1);				//Mouvements Canon2
+					meuble[3]->sprite->setRotation(-angleVisee[1]);
+				}
+			}
+
+			
+			lastRot = angleVisee[0];
+			lastRot1 = angleVisee[1];
+
+#pragma region Collisions
+			for (Entity * ent : meuble)   //Collisions avec la liste d'entités
+			{
+				if (!ent->isPlayer && !ent->isCanon && meuble[0]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
+					JoySpeed = 0.f;					//J1 & Murs
+					shPos.x = lastGoodPos.x;
+					shPos.y = lastGoodPos.y;
+					break;
+				}
+				else
+					JoySpeed = 0.1f;
+
+				if (!ent->isPlayer && !ent->isCanon && meuble[1]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
+					JoySpeed1 = 0.f;
+					shPos1.x = lastGoodPos1.x;		//J2 & Murs
+					shPos1.y = lastGoodPos1.y;
+					break;
+				}
+				else
+					JoySpeed1 = 0.1f;
+			}
+
+#pragma endregion
+		}
+void InitEndGame() {
+
+}
 int main()
 {
 	sf::ContextSettings settings;
@@ -179,30 +310,29 @@ int main()
 	sf::Time frameStart = clock.getElapsedTime();
 	sf::Time prevFrameStart = clock.getElapsedTime();
 
+	if (!_crackedText.loadFromFile("res/Crack.png")) printf("no such file");
 
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
 	int step = 0;
 
 	char fpslabel[64];
 
-	sf::Font MyFont;
-	MyFont.loadFromFile("arial.ttf");
-
+	MyFont->loadFromFile("BREAK IT.ttf");
 	// Chargement à partir d'un fichier sur le disque
 
-	if (!MyFont.loadFromFile("arial.ttf"))
+	if (!MyFont->loadFromFile("BREAK IT.ttf"))
 	{
 		// Erreur...
 	}
 
-	sf::Text myFPScounter;
-	myFPScounter.setFont(MyFont);
+	/*sf::Text myFPScounter;
+	myFPScounter.setFont(MyFont);*/
 	
 	int every = 0;	
 
 	initChar();
 	initEntities();
-
+	Menu();
 
 	while (window.isOpen())  // on passe tout le temps
 	{
@@ -210,11 +340,10 @@ int main()
 		frameStart = clock.getElapsedTime();		
 		window.setMouseCursorVisible(false);
 
-		
 
 		if (every == 0)
 		{
-			myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));					
+			//myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));					
 		
 		}
 		while (window.pollEvent(event))  //met l'évènement en premier de la queue
@@ -268,7 +397,10 @@ int main()
 		
 				break;
 
-			
+			case sf::Event::JoystickButtonPressed: 
+				if (event.joystickButton.joystickId == 0)
+					if (event.joystickButton.button == 0)
+						_gameState = PLAYING;
 
 			case sf::Event::KeyPressed:						
 				
@@ -313,114 +445,30 @@ int main()
 
 		}
 
-		float lastRot = meuble[2]->sprite->getRotation();
-		float lastRot1 = meuble[3]->sprite->getRotation();
-#pragma region deadzone
-
-		if (Xjoy0 > 15 || Xjoy0 < -15)
-			shPos.x += Xjoy0 * JoySpeed;
-
-		if (Yjoy0 > 15 || Yjoy0 < -15)
-			shPos.y += Yjoy0 * JoySpeed;
-
-		if (Ujoy0 > 50 || Ujoy0 < -50 || Vjoy0 > 50 || Vjoy0 < -50) {
-			angle[0] = atan2(Vjoy0, Ujoy0);
-			angleVisee[0] = atan2(Ujoy0, Vjoy0) * 180 / 3.14159265359;
-		}
-		else if (Ujoy0 == 0 || Vjoy0 == 0)
-		{
-			angleVisee[0] = lastRot;
-		}
-
-		if ((Zjoy0 > 80 || Zjoy0 < -80) && Zjoy0 != 100 && Zjoy0 != -100 && !shoot && !meuble[2]->destroyed)
-		{
-			shoot = true;
-			launchProj(window, 0);
-		}
-		else if ((Zjoy0 < 20 && Zjoy0 > -20) && shoot) shoot = false;
-
-
-		////////////////////////////////////
-
-		if (Xjoy1 > 15 || Xjoy1 < -15)
-			shPos1.x += Xjoy1 * JoySpeed1;
-
-		if (Yjoy1 > 15 || Yjoy1 < -15)
-			shPos1.y += Yjoy1 * JoySpeed1;
-
-		if (Ujoy1 > 50 || Ujoy1 < -50 || Vjoy1 > 50 || Vjoy1 < -50) {
-			angle[1] = atan2(Vjoy1, Ujoy1);
-			angleVisee[1] = atan2(Ujoy1, Vjoy1) * 180 / 3.14159265359;
-		}
-		else if (Ujoy1 == 0 || Vjoy1 == 0)
-		{
-			angleVisee[1] = lastRot1;
-		}
-
-		if ((Zjoy1 > 80 || Zjoy1 < -80) && Zjoy1 != 100 && Zjoy1 != -100 && !shoot1 && !meuble[3]->destroyed)
-		{
-			shoot1 = true;
-			launchProj(window, 1);
-		}
-		else if ((Zjoy1 < 20 && Zjoy1 > -20) && shoot1) shoot1 = false;
-
-
-#pragma endregion			
-
-		for (int i = 0; i < 4; i++)
-		{
-			if (meuble[i]->isPlayer)
-			{
-				//Mouvements J1 et J2			
-				i == 0 ? meuble[i]->sprite->setPosition(shPos) : meuble[i]->sprite->setPosition(shPos1);
-				lastGoodPos = meuble[0]->sprite->getPosition();
-				lastGoodPos1 = meuble[1]->sprite->getPosition();
-			}
-
-			if (meuble[i]->isCanon)
-			{
-				meuble[2]->sprite->setPosition(shPos);				//Mouvements Canon1
-				meuble[2]->sprite->setRotation(-angleVisee[0]);
-
-				meuble[3]->sprite->setPosition(shPos1);				//Mouvements Canon2
-				meuble[3]->sprite->setRotation(-angleVisee[1]);
-			}
-		}
-
-		
-			
-
-
-#pragma region Collisions
-		for (Entity * ent : meuble)   //Collisions avec la liste d'entités
-		{
-			if (!ent->isPlayer && !ent->isCanon && meuble[0]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
-				JoySpeed = 0.f;					//J1 & Murs
-				shPos.x = lastGoodPos.x;
-				shPos.y = lastGoodPos.y;
-				break;
-			}
-			else
-				JoySpeed = 0.1f;
-
-			if (!ent->isPlayer && !ent->isCanon && meuble[1]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
-				JoySpeed1 = 0.f;
-				shPos1.x = lastGoodPos1.x;		//J2 & Murs
-				shPos1.y = lastGoodPos1.y;
-				break;
-			}
-			else
-				JoySpeed1 = 0.1f;
-		}
-
-#pragma endregion
-
 		window.clear(); // nettoie la fenêtre
+
+		switch (_gameState)
+		{
+		case MENU:
+			drawMenu(window);
+			break;
+		case PLAYING:
+			drawEntities(window);
+			Move(window);		
+			break;
+		case ENDGAME:
+			drawEntities(window);
+			window.clear();
+			break;
+		default:
+			break;
+		}
+
 		
-		window.draw(myFPScounter); // on demande le dessin d'une forme
 
-		drawEntities(window);	
-
+		//window.draw(myFPScounter); // on demande le dessin d'une forme		
+		
+		
 		for (int i = 0; i < _proj.size(); i++)
 		{
 			_proj[i]->move();
@@ -432,14 +480,16 @@ int main()
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
 				{
 					meuble[j]->_destroy(window);
-					meuble[0]->_destroy(window);
-					printf("exterminate P1 "); // P1 touché par proj
+					meuble[0]->_destroy(window); // P1 touché par proj
+
+					_gameState = ENDGAME;
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
 				{
 					meuble[j]->_destroy(window);
-					meuble[1]->_destroy(window);
-					printf("exterminate P2 "); // P2 touché par proj
+					meuble[1]->_destroy(window); // P2 touché par proj
+
+					_gameState = ENDGAME;
 				}
 			}
 		}
