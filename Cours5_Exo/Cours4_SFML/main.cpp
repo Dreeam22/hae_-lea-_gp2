@@ -10,6 +10,8 @@
 #include "enum.h"
 #include "Texts.hpp"
 
+
+
 using namespace sf;
 
 static Vector2f shPos, shPos1;
@@ -33,6 +35,10 @@ GameState _gameState = MENU;
 
 sf::Texture _crackedText;
 sf::Texture _empty;
+
+bool shake = false;
+int shakeTime = 0;
+
 
 
 RectangleShape *initRecShape(float x, float y) {
@@ -315,6 +321,14 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(1240, 720), "SFML works!", sf::Style::Default, settings); //taille de la fenêtre
 	window.setVerticalSyncEnabled(true);
 
+	auto _view = window.getView();
+	Vector2f centre = window.getView().getCenter();
+
+	int shakemaxX = centre.x + 10;
+	int shakemaxY = centre.y + 10;
+	int shakeminX = centre.x - 10;
+	int shakeminY = centre.y - 10;
+
 	sf::Clock clock;
 
 	sf::Time displayDuration = clock.getElapsedTime();
@@ -359,6 +373,20 @@ int main()
 		{
 			//myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));					
 		
+		}
+
+		if (shake) {
+			if (shakeTime > 0) {
+				Vector2f shaking(rand() % (shakemaxX - shakeminX - 1) + shakeminX, rand() % (shakemaxY - shakeminY + 1) + shakeminY);
+				_view.setCenter(shaking);
+				shakeTime--;
+			}
+			else
+			{
+				_view.setCenter(centre);
+				shake = false;
+			}
+			window.setView(_view);
 		}
 		while (window.pollEvent(event))  //met l'évènement en premier de la queue
 		{			
@@ -497,6 +525,8 @@ int main()
 			for (int j = 0; j < meuble.size(); j++) {
 				if (_proj[i]->box.intersects(meuble[j]->box) && !meuble[j]->isPlayer)
 				{
+					shakeTime = 5;
+					shake = true;
 					meuble[j]->life -= 1;
 					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble					
 				}
