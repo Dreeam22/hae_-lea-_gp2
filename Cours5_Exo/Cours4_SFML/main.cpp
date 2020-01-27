@@ -20,6 +20,7 @@ static std::vector<float> angle{ 0,0 };
 
 float Xjoy0 = 0, Yjoy0 = 0, Ujoy0 = 0, Vjoy0 = 0, Zjoy0 = 0; //J1
 float Xjoy1 = 0, Yjoy1 = 0, Ujoy1 = 0, Vjoy1 = 0, Zjoy1 = 0; //J2
+
 float lastRot = 90.0f;
 float lastRot1 = 90.0f;
 
@@ -27,11 +28,12 @@ int squareSpeed = 3;
 float JoySpeed = 0.1f, JoySpeed1 = 0.1f;
 bool shoot = false, shoot1 = false;;
 sf::Font *MyFont = new Font;
-//sf::Text Title, PressToStart, DescriptionTxt;
 
 GameState _gameState = MENU;
 
 sf::Texture _crackedText;
+sf::Texture _empty;
+
 
 RectangleShape *initRecShape(float x, float y) {
 	auto _rectangle = new RectangleShape(Vector2f(x, y));
@@ -86,17 +88,14 @@ static void initChar()
 {
 #pragma region initChar1
 
-	auto rec = new Entity(initRecShape(16,16), initRecShape(16, 16), Vector2f(shPos.x = 400, shPos.y = 400), &_crackedText);
+	auto rec = new Entity(initRecShape(16,16), initRecShape(16, 16), Vector2f(shPos.x = 400, shPos.y = 400), sf::Color(0xFF95D0ff), &_empty);
 	rec->sprite->setOrigin(8, 8);
-	rec->sprite->setFillColor(sf::Color(0xFF95D0ff));
 	rec->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec->sprite->setOutlineThickness(2);
 	rec->isPlayer = true;
 
-	auto canon = new Entity(initRecShape(8, 24), initRecShape(8, 24), Vector2f(shPos.x, shPos.y), &_crackedText);
+	auto canon = new Entity(initRecShape(8, 24), initRecShape(8, 24), Vector2f(shPos.x, shPos.y), sf::Color(0x4EEB83ff), &_empty);
 	canon->sprite->setOrigin(4, 4);
-	//canon->sprite->setRotation(90);
-	canon->sprite->setFillColor(sf::Color(0x4EEB83ff));
 	canon->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon->sprite->setOutlineThickness(1);
 	canon->isCanon = true;
@@ -105,17 +104,15 @@ static void initChar()
 #pragma endregion
 	
 #pragma region initChar2
-	auto rec1 = new Entity(initRecShape(16, 16), initRecShape(16, 16), Vector2f(shPos1.x = 600, shPos1.y = 600), &_crackedText);
+	auto rec1 = new Entity(initRecShape(16, 16), initRecShape(16, 16), Vector2f(shPos1.x = 600, shPos1.y = 600), sf::Color::Red, &_empty);
 	rec1->sprite->setOrigin(8, 8);
-	rec1->sprite->setFillColor(sf::Color::Red);
 	rec1->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec1->sprite->setOutlineThickness(2);
 	rec1->isPlayer = true;
 
-	auto canon1 = new Entity(initRecShape(8, 24), initRecShape(8, 24), Vector2f(shPos1.x, shPos1.y), &_crackedText);
+	auto canon1 = new Entity(initRecShape(8, 24), initRecShape(8, 24), Vector2f(shPos1.x, shPos1.y), sf::Color::Blue, &_empty);
 	canon1->sprite->setOrigin(4,4);
 	//canon1->sprite->setRotation(90);
-	canon1->sprite->setFillColor(sf::Color::Blue);
 	canon1->sprite->setOutlineColor(sf::Color(0x000000ff));
 	canon1->sprite->setOutlineThickness(1);
 	canon1->isCanon = true;
@@ -131,19 +128,13 @@ static void initChar()
 
 
 static void initEntities() {
-	auto meuble1 = new Entity(initRecShape(80.0f,80.0f), initRecShape(80.0f, 80.0f), Vector2f(0,0), &_crackedText);
-	//meuble1->sprite->setOrigin(4, 4);
-	meuble1->sprite->setFillColor(sf::Color(0xEB78FFff));	
+	auto meuble1 = new Entity(initRecShape(80.0f,80.0f), initRecShape(80.0f, 80.0f), Vector2f(0,0), sf::Color(0xEB78FFff),  &_empty);
 	meuble.push_back(meuble1);
 
-	auto meuble2 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(800, 500), &_crackedText);
-	//meuble2->sprite->setOrigin(4, 4);
-	meuble2->sprite->setFillColor(sf::Color(0xEB78FFff));
+	auto meuble2 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(800, 500), sf::Color(0xEB78FFff), &_empty);
 	meuble.push_back(meuble2);
 
-	auto meuble3 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(100,100), &_crackedText);
-	//meuble3->sprite->setOrigin(4, 4);
-	meuble3->sprite->setFillColor(sf::Color(0xEB78FFff));
+	auto meuble3 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(100,100), sf::Color(0xEB78FFff), &_empty);
 	meuble.push_back(meuble3);
 
 	
@@ -171,20 +162,21 @@ void launchProj(sf::RenderWindow &win, int player) {
 
 void Menu() {
 	
-	auto Title = new Textes(MyFont, 120, Vector2f(450, 0), sf::Color::White, "BREAK IT");
+	auto Title = new Textes(MyFont, 120, Vector2f(450, 0), sf::Color::White, "BREAK IT", true);
 	_textes.push_back(Title);
 
-	auto PTS = new Textes(MyFont, 120, Vector2f(215, 500), sf::Color::Red, "Press A to start");
+	auto PTS = new Textes(MyFont, 120, Vector2f(215, 500), sf::Color::Red, "Press A to start",true);
 	_textes.push_back(PTS);
 
-	auto DT = new Textes(MyFont, 80, Vector2f(150, 300), sf::Color::White, "Player 1 is \t\t Player 2 is");
+	auto DT = new Textes(MyFont, 80, Vector2f(150, 300), sf::Color::White, "Player 1 is \t\t Player 2 is",true);
 	_textes.push_back(DT);
 
 }
 
 void drawMenu(RenderWindow &win) {
 	for (int i = 0; i < _textes.size(); i++) {
-		_textes[i]->_draw(win);
+		if (_textes[i]->isMenu)
+			_textes[i]->_draw(win);
 	}
 }
 void Move(RenderWindow & window) {
@@ -287,12 +279,33 @@ void Move(RenderWindow & window) {
 				}
 				else
 					JoySpeed1 = 0.1f;
+
+				if (ent->life == 1) ent->spritetexture->setTexture(&_crackedText);
+				if (ent->life <= 0) ent->_destroy(window);
 			}
 
 #pragma endregion
 		}
-void InitEndGame() {
-
+void InitEndGame(int player) {
+	if (player == 0)
+	{
+		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J1", false); //trouver couleur pour J1 & J2
+		_textes.push_back(Winner);
+	}
+	else
+	{
+		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J2", false); //trouver couleur pour J1 & J2
+		_textes.push_back(Winner);
+	}
+	
+	auto PTR = new Textes(MyFont, 120, Vector2f(215, 500), sf::Color::Red, "Press A to replay", false);
+	_textes.push_back(PTR);
+}
+void drawEndgame(RenderWindow &win) {
+	for (int i = 0; i < _textes.size(); i++) {
+		if (!_textes[i]->isMenu)
+			_textes[i]->_draw(win);
+	}
 }
 int main()
 {
@@ -310,7 +323,8 @@ int main()
 	sf::Time frameStart = clock.getElapsedTime();
 	sf::Time prevFrameStart = clock.getElapsedTime();
 
-	if (!_crackedText.loadFromFile("res/Crack.png")) printf("no such file");
+	if (!_crackedText.loadFromFile("res/Crack1.png")) printf("no such file");
+	if (!_empty.loadFromFile("res/Empty.png")) printf("no such file");
 
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
 	int step = 0;
@@ -399,8 +413,16 @@ int main()
 
 			case sf::Event::JoystickButtonPressed: 
 				if (event.joystickButton.joystickId == 0)
-					if (event.joystickButton.button == 0)
+					if (event.joystickButton.button == 0 && _gameState == MENU)
 						_gameState = PLAYING;
+					else if (event.joystickButton.button == 0 && _gameState == ENDGAME)
+					{
+						meuble.clear();
+						_proj.clear();
+						initChar();
+						initEntities();
+						_gameState = PLAYING;
+					}
 
 			case sf::Event::KeyPressed:						
 				
@@ -457,8 +479,8 @@ int main()
 			Move(window);		
 			break;
 		case ENDGAME:
-			drawEntities(window);
 			window.clear();
+			drawEndgame(window);
 			break;
 		default:
 			break;
@@ -475,14 +497,16 @@ int main()
 			for (int j = 0; j < meuble.size(); j++) {
 				if (_proj[i]->box.intersects(meuble[j]->box) && !meuble[j]->isPlayer)
 				{
-					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble
+					meuble[j]->life -= 1;
+					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble					
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
 				{
 					meuble[j]->_destroy(window);
 					meuble[0]->_destroy(window); // P1 touché par proj
-
+					
 					_gameState = ENDGAME;
+					InitEndGame(1);
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
 				{
@@ -490,6 +514,7 @@ int main()
 					meuble[1]->_destroy(window); // P2 touché par proj
 
 					_gameState = ENDGAME;
+					InitEndGame(0);
 				}
 			}
 		}

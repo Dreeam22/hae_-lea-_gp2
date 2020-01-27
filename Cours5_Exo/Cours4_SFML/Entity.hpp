@@ -11,16 +11,20 @@ public:
 	sf::FloatRect		box;//pour les collisions
 	bool isPlayer = false, isCanon = false;
 	sf::Texture _texture;
+	int life = 2;
 
-	Entity(sf::Shape *forme, sf::Shape *formeText, sf::Vector2f Pos, sf::Texture * texture) {
-		this->sprite = forme;
-		this->sprite->setPosition(Pos.x, Pos.y);
+	Entity(sf::Shape *forme, sf::Shape *formeText, sf::Vector2f Pos, sf::Color color, sf::Texture * texture) {
+		sprite = forme;
+		sprite->setPosition(Pos.x, Pos.y);
+		sprite->setFillColor(color);
 
-		this->box = this->sprite->getGlobalBounds();
+		box = this->sprite->getGlobalBounds();
 		
 		spritetexture = formeText;
 		spritetexture->setPosition(Pos.x, Pos.y);
 		spritetexture->setTexture(texture);
+
+		
 	}
 
 	~Entity()
