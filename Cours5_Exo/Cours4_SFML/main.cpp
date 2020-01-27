@@ -39,7 +39,10 @@ sf::Texture _empty;
 bool shake = false;
 int shakeTime = 0;
 
+bool dmg = false;
+int dmgTime = 0;
 
+int _player = 0;
 
 RectangleShape *initRecShape(float x, float y) {
 	auto _rectangle = new RectangleShape(Vector2f(x, y));
@@ -258,7 +261,9 @@ void Move(RenderWindow & window) {
 
 					meuble[3]->sprite->setPosition(shPos1);				//Mouvements Canon2
 					meuble[3]->sprite->setRotation(-angleVisee[1]);
+					
 				}
+
 			}
 
 			
@@ -292,6 +297,7 @@ void Move(RenderWindow & window) {
 
 #pragma endregion
 		}
+
 void InitEndGame(int player) {
 	if (player == 0)
 	{
@@ -313,6 +319,7 @@ void drawEndgame(RenderWindow &win) {
 			_textes[i]->_draw(win);
 	}
 }
+
 int main()
 {
 	sf::ContextSettings settings;
@@ -388,6 +395,23 @@ int main()
 			}
 			window.setView(_view);
 		}
+
+		if (dmg)
+		{
+			if (dmgTime > 0)
+			{
+				meuble[_player]->sprite->setTexture(&_empty);
+				dmgTime--;
+			}
+			else
+			{
+				meuble[_player]->sprite->setTexture(nullptr);
+				dmg = false;
+
+				int j = 0;
+			}
+		}
+	
 		while (window.pollEvent(event))  //met l'évènement en premier de la queue
 		{			
 			
@@ -532,19 +556,31 @@ int main()
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
 				{
-					meuble[j]->_destroy(window);
-					meuble[0]->_destroy(window); // P1 touché par proj
+					_player = j;
+					dmgTime = 5;
+					dmg = true;
+				
+					shakeTime = 5;
+					shake = true;
+					//meuble[j]->_destroy(window);
+					//meuble[0]->_destroy(window); // P1 touché par proj
 					
-					_gameState = ENDGAME;
-					InitEndGame(1);
+					//_gameState = ENDGAME;
+					//InitEndGame(1);
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
 				{
-					meuble[j]->_destroy(window);
-					meuble[1]->_destroy(window); // P2 touché par proj
+					_player = j;
+					dmgTime = 5;
+					dmg = true;
+					
+					shakeTime = 5;
+					shake = true;
+					//meuble[j]->_destroy(window);
+					//meuble[1]->_destroy(window); // P2 touché par proj
 
-					_gameState = ENDGAME;
-					InitEndGame(0);
+					//_gameState = ENDGAME;
+					//InitEndGame(0);
 				}
 			}
 		}

@@ -14,7 +14,7 @@ public:
 	Vector2f dir;
 	float x, y;
 	bool isProj = false;
-	int projSpeed = 2;
+	int projSpeed = 5;
 
 	Proj(sf::Shape *forme, sf::Vector2f Pos, float angle, bool _isProj) {
 		this->sprite = forme;
