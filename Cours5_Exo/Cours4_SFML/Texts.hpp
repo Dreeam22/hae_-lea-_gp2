@@ -6,7 +6,7 @@ class Textes : public Text
 {
 public:
 	sf::Text *UI = new Text;
-	bool isMenu;
+	bool isMenu, isIG;
 	Textes(sf::Font *_myfont, int _size, sf::Vector2f _pos, sf::Color _color, sf::String _string, bool _isMenu) {
 
 		UI->setFont(*_myfont);

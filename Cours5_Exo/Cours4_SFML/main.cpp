@@ -9,6 +9,7 @@
 #include "Proj.hpp"
 #include "enum.h"
 #include "Texts.hpp"
+#include<SFML/Audio.hpp>
 
 
 
@@ -31,6 +32,7 @@ float JoySpeed = 0.1f, JoySpeed1 = 0.1f;
 bool shoot = false, shoot1 = false;;
 sf::Font *MyFont = new Font;
 
+int Score1 =0 , Score2 =0;
 GameState _gameState = MENU;
 
 sf::Texture _crackedText;
@@ -51,6 +53,10 @@ int moitie;
 
 
 int _player = 0;
+
+sf::Sound SFX;
+sf::SoundBuffer _hit, _exploS;
+sf::Music _music;
 
 RectangleShape *initRecShape(float x, float y) {
 	auto _rectangle = new RectangleShape(Vector2f(x, y));
@@ -105,7 +111,7 @@ static void initChar()
 {
 #pragma region initChar1
 
-	auto rec = new Entity(initRecShape(16,16), initRecShape(16, 16), Vector2f(shPos.x = 400, shPos.y = 400), sf::Color(0xFF95D0ff), &_empty);
+	auto rec = new Entity(initRecShape(16,16), initRecShape(16, 16), Vector2f(shPos.x = 1000, shPos.y = 400), sf::Color(0xFF95D0ff), &_empty);
 	rec->sprite->setOrigin(8, 8);
 	rec->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec->sprite->setOutlineThickness(2);
@@ -121,7 +127,7 @@ static void initChar()
 #pragma endregion
 	
 #pragma region initChar2
-	auto rec1 = new Entity(initRecShape(16, 16), initRecShape(16, 16), Vector2f(shPos1.x = 600, shPos1.y = 600), sf::Color::Red, &_empty);
+	auto rec1 = new Entity(initRecShape(16, 16), initRecShape(16, 16), Vector2f(shPos1.x = 400, shPos1.y = 400), sf::Color::Red, &_empty);
 	rec1->sprite->setOrigin(8, 8);
 	rec1->sprite->setOutlineColor(sf::Color(0xFFBB4Dff));
 	rec1->sprite->setOutlineThickness(2);
@@ -145,48 +151,46 @@ static void initChar()
 
 
 static void initEntities() {
-	auto meuble1 = new Entity(initRecShape(40.0f,40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,0), sf::Color(0xEB78FFff),  &_empty);
-	auto meuble2 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 40), sf::Color(0xEB78FFff), &_empty);
-	auto meuble3 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,80), sf::Color(0xEB78FFff), &_empty);
-	auto meuble4 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,120), sf::Color(0xEB78FFff), &_empty);
-	auto meuble5 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,160), sf::Color(0xEB78FFff), &_empty);
-	auto meuble6 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,200), sf::Color(0xEB78FFff), &_empty);
-	auto meuble7 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,240), sf::Color(0xEB78FFff), &_empty);
-	auto meuble8 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,280), sf::Color(0xEB78FFff), &_empty);
-	auto meuble9 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,320), sf::Color(0xEB78FFff), &_empty);
-	auto meuble10 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,320), sf::Color(0xEB78FFff), &_empty);
-	auto meuble11= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,360), sf::Color(0xEB78FFff), &_empty);
-	auto meuble12= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,400), sf::Color(0xEB78FFff), &_empty);
-	auto meuble13= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 440), sf::Color(0xEB78FFff), &_empty);
-	auto meuble14= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 480), sf::Color(0xEB78FFff), &_empty);
-	auto meuble15= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 520), sf::Color(0xEB78FFff), &_empty);
-	auto meuble16= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 560), sf::Color(0xEB78FFff), &_empty);
-	auto meuble17= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 600), sf::Color(0xEB78FFff), &_empty);
-	auto meuble18= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 640), sf::Color(0xEB78FFff), &_empty);
-	auto meuble19= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 680), sf::Color(0xEB78FFff), &_empty);
+	int y = 0;
+	for (int i = 0; i < 19; i++)
+	{
 
-	auto meuble20= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 680), sf::Color(0xEB78FFff), &_empty);
-	
+		auto mur = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(540, y), sf::Color(0xEB78FFff), &_empty);
+		meuble.push_back(mur);
+		y += 40;
 
-	meuble.push_back(meuble1);
-	meuble.push_back(meuble2);
-	meuble.push_back(meuble3);
-	meuble.push_back(meuble4);
-	meuble.push_back(meuble5);
-	meuble.push_back(meuble6);
-	meuble.push_back(meuble7);
-	meuble.push_back(meuble8);
-	meuble.push_back(meuble9);
-	meuble.push_back(meuble10);
-	meuble.push_back(meuble11);
-	meuble.push_back(meuble12);
-	meuble.push_back(meuble13);
-	meuble.push_back(meuble14);
-	meuble.push_back(meuble15);
-	meuble.push_back(meuble16);
-	meuble.push_back(meuble17);
-	meuble.push_back(meuble18);
-	meuble.push_back(meuble19);
+		if (i >= 18)
+			y = 0;
+	}
+	for (int i = 0; i < 19; i++) 
+	{
+
+		auto mur1 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(580, y), sf::Color(0xEB78FFff), &_empty);
+		meuble.push_back(mur1);
+		y += 40;
+
+		if (i >= 18)
+			y = 0;
+	}
+	for (int i = 0; i < 19; i++)
+	{
+		auto mur2 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, y), sf::Color(0xEB78FFff), &_empty);
+		meuble.push_back(mur2);
+		y += 40;
+		if (i >= 18) 
+			y = 0;
+	}
+	for (int i = 0; i < 19; i++) 
+	{
+
+		auto mur3 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(660, y), sf::Color(0xEB78FFff), &_empty);
+		meuble.push_back(mur3);
+		y += 40;
+
+		if (i >= 18)
+			y = 0;
+	}
+
 }
 
 static void drawEntities(sf::RenderWindow &win) {
@@ -201,8 +205,8 @@ static void drawEntities(sf::RenderWindow &win) {
 void launchProj(sf::RenderWindow &win, int player) {
 
 	auto proj = new Proj(initRecShape(4.0f,4.0f), 
-		Vector2f(meuble[player]->sprite->getPosition().x + cos(angle[player]) *30, 
-			meuble[player]->sprite->getPosition().y + sin(angle[player]) *30), 
+		Vector2f(meuble[player]->sprite->getPosition().x + cos(angle[player]) *50, 
+			meuble[player]->sprite->getPosition().y + sin(angle[player]) *50), 
 			angle[player]);
 	proj->sprite->setOrigin(2, 4);
 	proj->sprite->setRotation(angle[player] * 180 / 3.14159265359);
@@ -226,17 +230,20 @@ void InitEndGame(int player) {
 
 	if (player == 3)
 	{
+		Score1++;
 		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J1", false); //trouver couleur pour J1 & J2
 		_textes.push_back(Winner);
 	}
 	else if (player == 2)
 	{
+		Score2++;
 		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J2", false); //trouver couleur pour J1 & J2
 		_textes.push_back(Winner);
 	}
 
 	auto PTR = new Textes(MyFont, 120, Vector2f(215, 500), sf::Color::Red, "Press A to replay", false);
 	_textes.push_back(PTR);
+	
 }
 void drawEndgame(RenderWindow &win) {
 	for (int i = 0; i < _textes.size(); i++) {
@@ -252,7 +259,8 @@ void drawMenu(RenderWindow &win) {
 			_textes[i]->_draw(win);
 	}
 }
-void Move(RenderWindow & window) {
+
+static void Move(RenderWindow & window) {
 		//	float lastRot = meuble[2]->sprite->getRotation();
 		//	float lastRot1 = meuble[3]->sprite->getRotation();
 #pragma region deadzone
@@ -335,7 +343,7 @@ void Move(RenderWindow & window) {
 			lastRot1 = angleVisee[1];
 
 #pragma region Collisions
-			for (Entity * ent : meuble)   //Collisions avec la liste d'entités
+			for (Entity *ent : meuble)   //Collisions avec la liste d'entités
 			{
 				if (!ent->isPlayer && !ent->isCanon && meuble[0]->sprite->getGlobalBounds().intersects(ent->sprite->getGlobalBounds())) {
 					JoySpeed = 0.f;					//J1 & Murs
@@ -355,9 +363,10 @@ void Move(RenderWindow & window) {
 				else
 					JoySpeed1 = 0.1f;
 
-				if (ent->life == 1) ent->spritetexture->setTexture(&_crackedText);				
+				if (ent->life == 1)
+					ent->spritetexture->setTexture(&_crackedText);
 
-				if (ent->isPlayer && ent->life <= 0) {		
+				if (ent->isPlayer && ent->life <= 0) {
 
 					Frame = 0;
 					explo.setPosition(ent->sprite->getPosition());
@@ -400,8 +409,13 @@ int main()
 	if (!_explo.loadFromFile("res/Explo.png")) printf("no such file");
 	explo.setPosition(Vector2f(-200, -200));
 	explo.setTexture(_explo);
-	explo.setOrigin(32, 32);
+	explo.setOrigin(40, 40);
 
+	if (!_exploS.loadFromFile("res/Explo.wav")) printf("no sound");
+	if (!_hit.loadFromFile("res/Hit.wav")) printf("no sound");
+	if(!_music.openFromFile("res/Music.ogg")) printf("no music");
+	_music.setLoop(true);
+	_music.play();
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
 	int step = 0;
 
@@ -586,11 +600,9 @@ int main()
 		}
 
 		window.clear(); // nettoie la fenêtre
-		explo.setTextureRect(IntRect(int(Frame) * 128, 0, 128, 128));
-		Frame += animspeed;
-		if (Frame < framecount) {
-			window.draw(explo);
-		}
+		
+		
+
 		switch (_gameState)
 		{
 		case MENU:
@@ -598,8 +610,9 @@ int main()
 			break;
 		case PLAYING:
 
+			
 			drawEntities(window);
-			Move(window);		
+			Move(window);
 			break;
 		case ENDGAME:
 			window.clear();			
@@ -622,17 +635,19 @@ int main()
 					shakeTime = 5;
 					shake = true;					
 					meuble[j]->life -= 1;
-
+					SFX.setBuffer(_hit);
+					SFX.play();
 
 					if (meuble[j]->life == 0) {										
 
 						explo.setPosition(meuble[j]->sprite->getPosition());
 						Frame = 0;
 						meuble[j]->_destroy(window);
+						SFX.setBuffer(_exploS);
+						SFX.play();
 						_proj.erase(_proj.begin() + i);
 						break;
-					}
-				
+					}					
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3 && dmgTime == 0)
 				{
@@ -674,7 +689,26 @@ int main()
 			}
 		}
 
+		//auto SP1 = new Textes(MyFont, 40, Vector2f(10, 0), sf::Color::White, "P1 = " + std::to_string(Score1), false);
+		//auto SP2 = new Textes(MyFont, 40, Vector2f(1150, 0), sf::Color::White, "P2 = " + std::to_string(Score2), false);
 
+		sf::Text SP1;
+		SP1.setFont(*MyFont);
+		SP1.setPosition(10, 0);
+		SP1.setString("P1 = " + std::to_string(Score1));
+		
+		sf::Text SP2;
+		SP2.setFont(*MyFont);
+		SP2.setPosition(1150, 0);
+		SP2.setString("P2 = " + std::to_string(Score2));
+		window.draw(SP1);
+		window.draw(SP2);
+
+		explo.setTextureRect(IntRect(int(Frame) * 128, 0, 128, 128));
+		Frame += animspeed;
+		if (Frame < framecount) {
+			window.draw(explo);
+		}
 		window.display(); //dessine & attends la vsync
 
 		fps[step % 4] = 1.0f/(frameStart - prevFrameStart).asSeconds();

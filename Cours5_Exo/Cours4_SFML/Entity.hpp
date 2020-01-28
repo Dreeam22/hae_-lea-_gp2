@@ -21,9 +21,9 @@ public:
 		box = this->sprite->getGlobalBounds();
 		
 		spritetexture = formeText;
-		spritetexture->setPosition(Pos.x, Pos.y);
+		spritetexture->setPosition(sprite->getPosition());
 		spritetexture->setTexture(texture);
-
+		//destroyable = _destroyable;
 		
 	}
 
