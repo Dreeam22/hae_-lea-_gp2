@@ -37,7 +37,7 @@ sf::Texture _crackedText;
 sf::Texture _empty;
 sf::Texture _explo;
 sf::Sprite explo;
-float Frame;
+float Frame = 0.f;
 int framecount = 20;
 float animspeed = 0.4f;
 
@@ -327,6 +327,8 @@ void Move(RenderWindow & window) {
 
 				if (ent->isPlayer && ent->life <= 0) {		
 
+					Frame = 0;
+					explo.setPosition(ent->sprite->getPosition());
 					ent->_destroy(window);
 					InitEndGame(_player);
 					_gameState = ENDGAME;
@@ -364,9 +366,8 @@ int main()
 	if (!_crackedText.loadFromFile("res/Crack1.png")) printf("no such file");
 	if (!_empty.loadFromFile("res/Empty.png")) printf("no such file");
 	if (!_explo.loadFromFile("res/Explo.png")) printf("no such file");
-	//explo.setPosition(Vector2f(200, 200));
+	explo.setPosition(Vector2f(-200, -200));
 	explo.setTexture(_explo);
-	explo.setTextureRect(IntRect(0, 0, 128 , 128));
 
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
 	int step = 0;
@@ -552,7 +553,6 @@ int main()
 		}
 
 		window.clear(); // nettoie la fenêtre
-	//	window.draw(explo);
 
 		switch (_gameState)
 		{
@@ -560,6 +560,7 @@ int main()
 			drawMenu(window);
 			break;
 		case PLAYING:
+
 			drawEntities(window);
 			Move(window);		
 			break;
@@ -571,7 +572,11 @@ int main()
 			break;
 		}
 
-		
+		explo.setTextureRect(IntRect(int(Frame) * 128, 0, 128, 128));
+		Frame += animspeed;
+		if (Frame < framecount) {
+			window.draw(explo);
+		}
 
 		//window.draw(myFPScounter); // on demande le dessin d'une forme		
 		
@@ -589,15 +594,11 @@ int main()
 					meuble[j]->life --;
 
 
-					if (meuble[j]->life == 0) {
-						explo.setPosition(meuble[j]->sprite->getPosition());						
-						Frame += animspeed;
-						meuble[j]->_destroy(window);
-						if (Frame < framecount) {
-							window.draw(explo);
-						}
+					if (meuble[j]->life == 0) {										
 
-						
+						Frame = 0;
+						explo.setPosition(meuble[j]->sprite->getPosition());
+						meuble[j]->_destroy(window);
 						_proj.erase(_proj.begin() + i);
 						break;
 					}
@@ -643,7 +644,7 @@ int main()
 			}
 		}
 		
-
+	
 		window.display(); //dessine & attends la vsync
 
 		fps[step % 4] = 1.0f/(frameStart - prevFrameStart).asSeconds();
