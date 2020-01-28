@@ -35,12 +35,20 @@ GameState _gameState = MENU;
 
 sf::Texture _crackedText;
 sf::Texture _empty;
+sf::Texture _explo;
+sf::Sprite explo;
+float Frame;
+int framecount = 20;
+float animspeed = 0.4f;
+
 
 bool shake = false;
 int shakeTime = 0;
 
 bool dmg = false;
 int dmgTime = 0;
+int moitie;
+
 
 int _player = 0;
 
@@ -182,6 +190,30 @@ void Menu() {
 
 }
 
+void InitEndGame(int player) {
+
+	if (player == 3)
+	{
+		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J1", false); //trouver couleur pour J1 & J2
+		_textes.push_back(Winner);
+	}
+	else if (player == 2)
+	{
+		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J2", false); //trouver couleur pour J1 & J2
+		_textes.push_back(Winner);
+	}
+
+	auto PTR = new Textes(MyFont, 120, Vector2f(215, 500), sf::Color::Red, "Press A to replay", false);
+	_textes.push_back(PTR);
+}
+void drawEndgame(RenderWindow &win) {
+	for (int i = 0; i < _textes.size(); i++) {
+		if (!_textes[i]->isMenu)
+			_textes[i]->_draw(win);
+	}
+}
+
+
 void drawMenu(RenderWindow &win) {
 	for (int i = 0; i < _textes.size(); i++) {
 		if (_textes[i]->isMenu)
@@ -291,34 +323,19 @@ void Move(RenderWindow & window) {
 				else
 					JoySpeed1 = 0.1f;
 
-				if (ent->life == 1) ent->spritetexture->setTexture(&_crackedText);
-				if (ent->life <= 0) ent->_destroy(window);
+				if (ent->life == 1) ent->spritetexture->setTexture(&_crackedText);				
+
+				if (ent->isPlayer && ent->life <= 0) {		
+
+					ent->_destroy(window);
+					InitEndGame(_player);
+					_gameState = ENDGAME;
+				}
 			}
 
 #pragma endregion
 		}
 
-void InitEndGame(int player) {
-	if (player == 0)
-	{
-		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J1", false); //trouver couleur pour J1 & J2
-		_textes.push_back(Winner);
-	}
-	else
-	{
-		auto Winner = new Textes(MyFont, 120, Vector2f(200, 0), sf::Color::White, "The Winner is J2", false); //trouver couleur pour J1 & J2
-		_textes.push_back(Winner);
-	}
-	
-	auto PTR = new Textes(MyFont, 120, Vector2f(215, 500), sf::Color::Red, "Press A to replay", false);
-	_textes.push_back(PTR);
-}
-void drawEndgame(RenderWindow &win) {
-	for (int i = 0; i < _textes.size(); i++) {
-		if (!_textes[i]->isMenu)
-			_textes[i]->_draw(win);
-	}
-}
 
 int main()
 {
@@ -346,6 +363,10 @@ int main()
 
 	if (!_crackedText.loadFromFile("res/Crack1.png")) printf("no such file");
 	if (!_empty.loadFromFile("res/Empty.png")) printf("no such file");
+	if (!_explo.loadFromFile("res/Explo.png")) printf("no such file");
+	//explo.setPosition(Vector2f(200, 200));
+	explo.setTexture(_explo);
+	explo.setTextureRect(IntRect(0, 0, 128 , 128));
 
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
 	int step = 0;
@@ -368,6 +389,7 @@ int main()
 	initChar();
 	initEntities();
 	Menu();
+	
 
 	while (window.isOpen())  // on passe tout le temps
 	{
@@ -397,10 +419,18 @@ int main()
 		}
 
 		if (dmg)
-		{
+		{			
 			if (dmgTime > 0)
 			{
-				meuble[_player]->sprite->setTexture(&_empty);
+				//meuble[_player]->sprite->setTexture(&_empty);							
+				if (moitie == dmgTime || moitie == dmgTime +1 || moitie == dmgTime -1)
+					meuble[_player]->sprite->setTexture(nullptr);
+				else if (moitie != dmgTime)
+				{
+					meuble[_player]->sprite->setTexture(&_empty);
+
+				}
+
 				dmgTime--;
 			}
 			else
@@ -408,8 +438,10 @@ int main()
 				meuble[_player]->sprite->setTexture(nullptr);
 				dmg = false;
 
-				int j = 0;
 			}
+
+			
+
 		}
 	
 		while (window.pollEvent(event))  //met l'évènement en premier de la queue
@@ -469,8 +501,8 @@ int main()
 						_gameState = PLAYING;
 					else if (event.joystickButton.button == 0 && _gameState == ENDGAME)
 					{
-						meuble.clear();
-						_proj.clear();
+
+						meuble.clear();						
 						initChar();
 						initEntities();
 						_gameState = PLAYING;
@@ -520,6 +552,7 @@ int main()
 		}
 
 		window.clear(); // nettoie la fenêtre
+	//	window.draw(explo);
 
 		switch (_gameState)
 		{
@@ -531,7 +564,7 @@ int main()
 			Move(window);		
 			break;
 		case ENDGAME:
-			window.clear();
+			window.clear();			
 			drawEndgame(window);
 			break;
 		default:
@@ -547,43 +580,69 @@ int main()
 		{
 			_proj[i]->move();
 			for (int j = 0; j < meuble.size(); j++) {
-				if (_proj[i]->box.intersects(meuble[j]->box) && !meuble[j]->isPlayer)
+				if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer)
 				{
+					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble				
 					shakeTime = 5;
 					shake = true;
-					meuble[j]->life -= 1;
-					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble					
+
+					meuble[j]->life --;
+
+
+					if (meuble[j]->life == 0) {
+						explo.setPosition(meuble[j]->sprite->getPosition());						
+						Frame += animspeed;
+						meuble[j]->_destroy(window);
+						if (Frame < framecount) {
+							window.draw(explo);
+						}
+
+						
+						_proj.erase(_proj.begin() + i);
+						break;
+					}
+
 				}
-				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3 && dmgTime == 0)
 				{
+
+					// P1 touché par proj
+					meuble[j]->life --;
+					_proj.erase(_proj.begin() + i);
+
 					_player = j;
-					dmgTime = 5;
+					dmgTime = 50;
+					moitie = dmgTime / 2;
 					dmg = true;
 				
 					shakeTime = 5;
 					shake = true;
-					//meuble[j]->_destroy(window);
-					//meuble[0]->_destroy(window); // P1 touché par proj
 					
-					//_gameState = ENDGAME;
-					//InitEndGame(1);
+					break;
+					
 				}
-				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2 && dmgTime == 0)
 				{
+
+					// P2 touché par proj
+
+					meuble[j]->life --;
+
+					_proj.erase(_proj.begin() + i);
 					_player = j;
-					dmgTime = 5;
+					dmgTime = 50;
+					moitie = dmgTime / 2;
 					dmg = true;
-					
+					                            
 					shakeTime = 5;
 					shake = true;
-					//meuble[j]->_destroy(window);
-					//meuble[1]->_destroy(window); // P2 touché par proj
 
-					//_gameState = ENDGAME;
-					//InitEndGame(0);
+					break;
+
 				}
 			}
 		}
+		
 
 		window.display(); //dessine & attends la vsync
 

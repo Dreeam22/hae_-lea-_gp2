@@ -32,7 +32,9 @@ public:
 
 	~Proj()
 	{
-
+		if (dir != Vector2f(0, 0)) dir = Vector2f(0, 0);
+		if (sprite) delete sprite;
+		sprite = nullptr;
 	}
 	void _draw(sf::RenderWindow &win);
 
