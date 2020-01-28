@@ -145,16 +145,48 @@ static void initChar()
 
 
 static void initEntities() {
-	auto meuble1 = new Entity(initRecShape(80.0f,80.0f), initRecShape(80.0f, 80.0f), Vector2f(0,0), sf::Color(0xEB78FFff),  &_empty);
-	meuble.push_back(meuble1);
+	auto meuble1 = new Entity(initRecShape(40.0f,40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,0), sf::Color(0xEB78FFff),  &_empty);
+	auto meuble2 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 40), sf::Color(0xEB78FFff), &_empty);
+	auto meuble3 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,80), sf::Color(0xEB78FFff), &_empty);
+	auto meuble4 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,120), sf::Color(0xEB78FFff), &_empty);
+	auto meuble5 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,160), sf::Color(0xEB78FFff), &_empty);
+	auto meuble6 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,200), sf::Color(0xEB78FFff), &_empty);
+	auto meuble7 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,240), sf::Color(0xEB78FFff), &_empty);
+	auto meuble8 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,280), sf::Color(0xEB78FFff), &_empty);
+	auto meuble9 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,320), sf::Color(0xEB78FFff), &_empty);
+	auto meuble10 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,320), sf::Color(0xEB78FFff), &_empty);
+	auto meuble11= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,360), sf::Color(0xEB78FFff), &_empty);
+	auto meuble12= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620,400), sf::Color(0xEB78FFff), &_empty);
+	auto meuble13= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 440), sf::Color(0xEB78FFff), &_empty);
+	auto meuble14= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 480), sf::Color(0xEB78FFff), &_empty);
+	auto meuble15= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 520), sf::Color(0xEB78FFff), &_empty);
+	auto meuble16= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 560), sf::Color(0xEB78FFff), &_empty);
+	auto meuble17= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 600), sf::Color(0xEB78FFff), &_empty);
+	auto meuble18= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 640), sf::Color(0xEB78FFff), &_empty);
+	auto meuble19= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 680), sf::Color(0xEB78FFff), &_empty);
 
-	auto meuble2 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(800, 500), sf::Color(0xEB78FFff), &_empty);
-	meuble.push_back(meuble2);
-
-	auto meuble3 = new Entity(initRecShape(80.0f, 80.0f), initRecShape(80.0f, 80.0f), Vector2f(100,100), sf::Color(0xEB78FFff), &_empty);
-	meuble.push_back(meuble3);
-
+	auto meuble20= new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, 680), sf::Color(0xEB78FFff), &_empty);
 	
+
+	meuble.push_back(meuble1);
+	meuble.push_back(meuble2);
+	meuble.push_back(meuble3);
+	meuble.push_back(meuble4);
+	meuble.push_back(meuble5);
+	meuble.push_back(meuble6);
+	meuble.push_back(meuble7);
+	meuble.push_back(meuble8);
+	meuble.push_back(meuble9);
+	meuble.push_back(meuble10);
+	meuble.push_back(meuble11);
+	meuble.push_back(meuble12);
+	meuble.push_back(meuble13);
+	meuble.push_back(meuble14);
+	meuble.push_back(meuble15);
+	meuble.push_back(meuble16);
+	meuble.push_back(meuble17);
+	meuble.push_back(meuble18);
+	meuble.push_back(meuble19);
 }
 
 static void drawEntities(sf::RenderWindow &win) {
@@ -171,7 +203,7 @@ void launchProj(sf::RenderWindow &win, int player) {
 	auto proj = new Proj(initRecShape(4.0f,4.0f), 
 		Vector2f(meuble[player]->sprite->getPosition().x + cos(angle[player]) *30, 
 			meuble[player]->sprite->getPosition().y + sin(angle[player]) *30), 
-			angle[player], true);
+			angle[player]);
 	proj->sprite->setOrigin(2, 4);
 	proj->sprite->setRotation(angle[player] * 180 / 3.14159265359);
 	_proj.push_back(proj);
@@ -368,6 +400,7 @@ int main()
 	if (!_explo.loadFromFile("res/Explo.png")) printf("no such file");
 	explo.setPosition(Vector2f(-200, -200));
 	explo.setTexture(_explo);
+	explo.setOrigin(32, 32);
 
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
 	int step = 0;
@@ -500,9 +533,9 @@ int main()
 				if (event.joystickButton.joystickId == 0)
 					if (event.joystickButton.button == 0 && _gameState == MENU)
 						_gameState = PLAYING;
-					else if (event.joystickButton.button == 0 && _gameState == ENDGAME)
+					if (event.joystickButton.button == 0 && _gameState == ENDGAME)
 					{
-
+						_proj.clear();
 						meuble.clear();						
 						initChar();
 						initEntities();
@@ -553,7 +586,11 @@ int main()
 		}
 
 		window.clear(); // nettoie la fenêtre
-
+		explo.setTextureRect(IntRect(int(Frame) * 128, 0, 128, 128));
+		Frame += animspeed;
+		if (Frame < framecount) {
+			window.draw(explo);
+		}
 		switch (_gameState)
 		{
 		case MENU:
@@ -572,12 +609,6 @@ int main()
 			break;
 		}
 
-		explo.setTextureRect(IntRect(int(Frame) * 128, 0, 128, 128));
-		Frame += animspeed;
-		if (Frame < framecount) {
-			window.draw(explo);
-		}
-
 		//window.draw(myFPScounter); // on demande le dessin d'une forme		
 		
 		
@@ -585,24 +616,23 @@ int main()
 		{
 			_proj[i]->move();
 			for (int j = 0; j < meuble.size(); j++) {
-				if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer)
+				if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer && !_proj[i]->bounced)
 				{
 					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble				
 					shakeTime = 5;
-					shake = true;
-
-					meuble[j]->life --;
+					shake = true;					
+					meuble[j]->life -= 1;
 
 
 					if (meuble[j]->life == 0) {										
 
-						Frame = 0;
 						explo.setPosition(meuble[j]->sprite->getPosition());
+						Frame = 0;
 						meuble[j]->_destroy(window);
 						_proj.erase(_proj.begin() + i);
 						break;
 					}
-
+				
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3 && dmgTime == 0)
 				{
@@ -643,8 +673,8 @@ int main()
 				}
 			}
 		}
-		
-	
+
+
 		window.display(); //dessine & attends la vsync
 
 		fps[step % 4] = 1.0f/(frameStart - prevFrameStart).asSeconds();

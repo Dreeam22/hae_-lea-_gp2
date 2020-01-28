@@ -2,7 +2,7 @@
 #include "Entity.hpp"
 
 void Entity::_draw(sf::RenderWindow & win) {
-	this->box = this->sprite->getGlobalBounds();
+	box = sprite->getGlobalBounds();
 	win.draw(*sprite);
 	win.draw(*spritetexture);
 }

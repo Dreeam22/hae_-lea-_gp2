@@ -22,5 +22,5 @@ void Proj::coll(Entity * meuble) {
 
 	if (posProj.x > meublePos.x + meubleOff.width || posProj.x < meublePos.x ) { dir.x *= -1; }
 	else if (posProj.y > meublePos.y + meubleOff.height || posProj.y < meublePos.y ) { dir.y *= -1; }
-
+	this->bounced = true;
 }
