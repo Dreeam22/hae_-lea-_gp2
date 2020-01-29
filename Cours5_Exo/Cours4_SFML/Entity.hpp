@@ -13,16 +13,17 @@ public:
 	sf::Texture _texture;
 	int life = 2;
 
-	Entity(sf::Shape *forme, sf::Shape *formeText, sf::Vector2f Pos, sf::Color color, sf::Texture * texture) {
+	Entity(sf::Shape *forme, sf::Shape *formeText, sf::Vector2f Pos, sf::Color color, sf::Texture * texture, sf::Texture * _spritetexture) {
 		sprite = forme;
 		sprite->setPosition(Pos.x, Pos.y);
 		sprite->setFillColor(color);
+		sprite->setTexture(texture);
 
 		box = this->sprite->getGlobalBounds();
 		
 		spritetexture = formeText;
 		spritetexture->setPosition(sprite->getPosition());
-		spritetexture->setTexture(texture);
+		spritetexture->setTexture(_spritetexture);
 		//destroyable = _destroyable;
 		
 	}

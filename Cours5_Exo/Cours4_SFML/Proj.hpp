@@ -16,10 +16,10 @@ public:
 	bool bounced = false;
 	int projSpeed = 10;
 
-	Proj(sf::Shape *forme, sf::Vector2f Pos, float angle) {
+	Proj(sf::Shape *forme, sf::Vector2f Pos, float angle, sf::Color color) {
 		this->sprite = forme;
 		this->sprite->setPosition(Pos.x, Pos.y);
-
+		sprite->setFillColor(color);
 		this->box = forme->getGlobalBounds();
 
 		this->dir = Vector2f(cos(angle), sin(angle));		
