@@ -22,7 +22,7 @@ public:
 		box = this->sprite->getGlobalBounds();
 		
 		spritetexture = formeText;
-		spritetexture->setPosition(sprite->getPosition());
+		spritetexture->setPosition(Pos.x, Pos.y);
 		spritetexture->setTexture(_spritetexture);
 		//destroyable = _destroyable;
 		
@@ -35,5 +35,7 @@ public:
 	void _draw(sf::RenderWindow &win);
 
 	void _destroy(sf::RenderWindow & win);
+
+	void _changeTexture(sf::RenderWindow &win, sf::Texture * newtext);
 
 };

@@ -159,7 +159,7 @@ static void initEntities() {
 	for (int i = 0; i < 19; i++)
 	{
 
-		auto mur = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(540, y), sf::Color::White, &_mur, &_empty);
+		auto mur = new Entity(initRecShape(40.0f, 40.0f), initRecShape(40.0f, 40.0f), Vector2f(540, y), sf::Color::White, &_mur, &_empty);
 		meuble.push_back(mur);
 		y += 40;
 
@@ -169,7 +169,7 @@ static void initEntities() {
 	for (int i = 0; i < 19; i++) 
 	{
 
-		auto mur1 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(580, y), sf::Color::White, &_mur, &_empty);
+		auto mur1 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(40.0f, 40.0f), Vector2f(580, y), sf::Color::White, &_mur, &_empty);
 		meuble.push_back(mur1);
 		y += 40;
 
@@ -178,7 +178,7 @@ static void initEntities() {
 	}
 	for (int i = 0; i < 19; i++)
 	{
-		auto mur2 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(620, y), sf::Color::White, &_mur, &_empty);
+		auto mur2 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(40.0f, 40.0f), Vector2f(620, y), sf::Color::White, &_mur, &_empty);
 		meuble.push_back(mur2);
 		y += 40;
 		if (i >= 18) 
@@ -187,7 +187,7 @@ static void initEntities() {
 	for (int i = 0; i < 19; i++) 
 	{
 
-		auto mur3 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(50.0f, 40.0f), Vector2f(660, y), sf::Color::White, &_mur, &_empty);
+		auto mur3 = new Entity(initRecShape(40.0f, 40.0f), initRecShape(40.0f, 40.0f), Vector2f(660, y), sf::Color::White, &_mur, &_empty);
 		meuble.push_back(mur3);
 		y += 40;
 
@@ -411,7 +411,9 @@ static void Move(RenderWindow & window) {
 					JoySpeed1 = 0.1f;
 
 				if (ent->life == 1 && !ent->isPlayer)
-					ent->spritetexture->setTexture(&_crackedText);
+				{
+					ent->_changeTexture(window, &_crackedText);
+				}
 
 				if (ent->isPlayer && ent->life <= 0) {
 
@@ -451,7 +453,7 @@ int main()
 	sf::Time frameStart = clock.getElapsedTime();
 	sf::Time prevFrameStart = clock.getElapsedTime();
 
-	if (!_crackedText.loadFromFile("res/Crack1.png")) printf("no such file");
+	if (!_crackedText.loadFromFile("res/Crack2-carre_400.png")) printf("no such file");
 	if (!_empty.loadFromFile("res/Empty.png")) printf("no such file");
 	if (!_explo.loadFromFile("res/Explo.png")) printf("no such file");
 	explo.setPosition(Vector2f(-200, -200));
