@@ -54,13 +54,11 @@ int shakeTime = 0;
 
 bool dmg = false;
 int dmgTime = 0;
-int moitie;
-
 
 int _player = 0;
 
 sf::Sound SFX;
-sf::SoundBuffer _hit, _exploS;
+sf::SoundBuffer _hit, _exploS, _exploF;
 sf::Music _music;
 
 RectangleShape *initRecShape(float x, float y) {
@@ -226,7 +224,7 @@ void launchProj(sf::RenderWindow &win, int player) {
 		Vector2f(meuble[player]->sprite->getPosition().x + cos(angle[player]) *50, 
 			meuble[player]->sprite->getPosition().y + sin(angle[player]) *50), 
 			angle[player], sf::Color::Black);
-	//proj->sprite->setOrigin(2, 4);
+	proj->sprite->setOrigin(2, 4);
 	proj->sprite->setRotation(angle[player] * 180 / 3.14159265359);
 	_proj.push_back(proj);
 }
@@ -253,13 +251,15 @@ void InitEndGame(int player) {
 	if (player == 3)
 	{
 		Score1++;
-		auto Winner = new Textes(MyFont2, 80, Vector2f(200, 50), sf::Color::White, "The Winner is P1", false); //trouver couleur pour J1 & J2
+		auto Winner = new Textes(MyFont2, 80, Vector2f(200, 50), sf::Color::Black, "The Winner is P1", false); //trouver couleur pour J1 & J2
+
 		_textes.push_back(Winner);
 	}
 	else if (player == 2)
 	{
 		Score2++;
-		auto Winner = new Textes(MyFont2, 80, Vector2f(200, 50), sf::Color::White, "The Winner is P2", false); //trouver couleur pour J1 & J2
+		auto Winner = new Textes(MyFont2, 80, Vector2f(200, 50), sf::Color::Black, "The Winner is P2", false); //trouver couleur pour J1 & J2
+
 		_textes.push_back(Winner);
 	}
 
@@ -417,6 +417,8 @@ static void Move(RenderWindow & window) {
 
 				if (ent->isPlayer && ent->life <= 0) {
 
+					SFX.setBuffer(_exploF);
+					SFX.play();
 					Frame = 0;
 					explo.setPosition(ent->sprite->getPosition());
 					ent->_destroy(window);
@@ -468,8 +470,10 @@ int main()
 	if (!_exploS.loadFromFile("res/Explo.wav")) printf("no sound");
 	if (!_hit.loadFromFile("res/Hit.wav")) printf("no sound");
 	if(!_music.openFromFile("res/Music.ogg")) printf("no music");
+	if(!_exploF.loadFromFile("res/Explo_fin.wav")) printf("no music");
 	_music.setLoop(true);
 	_music.play();
+	
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
 	int step = 0;
 
@@ -520,27 +524,22 @@ int main()
 		}
 
 		if (dmg)
-		{			
-			if (dmgTime > 0)
+		{	
+			dmgTime++;
+			auto culer = meuble[_player]->sprite->getFillColor();
+			if (dmgTime % 15 == 0)
 			{
-				//meuble[_player]->sprite->setTexture(&_empty);							
-				if (moitie == dmgTime || moitie == dmgTime +1 || moitie == dmgTime -1)
-					meuble[_player]->sprite->setTexture(nullptr);
-				else if (moitie != dmgTime)
-				{
-					meuble[_player]->sprite->setTexture(&_color);
-
-				}
-
-				dmgTime--;
+				
+				culer.a == 255 ? meuble[_player]->sprite->setFillColor(sf::Color(culer.r, culer.g, culer.b, 120)) : meuble[_player]->sprite->setFillColor(sf::Color(culer.r, culer.g, culer.b, 255));
+				
+				
 			}
-			else
-			{
-				meuble[_player]->sprite->setTexture(nullptr);
+			
+			if (dmgTime == 60) {
+				meuble[_player]->sprite->setFillColor(sf::Color(culer.r, culer.g, culer.b, 255));
+				dmgTime = 0;
 				dmg = false;
-
 			}
-
 			
 
 		}
@@ -675,7 +674,9 @@ int main()
 			Move(window);
 			break;
 		case ENDGAME:
-			window.clear();			
+			window.draw(sol);
+			drawEntities(window);
+			//window.clear();			
 			drawEndgame(window);
 			break;
 		default:
@@ -693,9 +694,9 @@ int main()
 				{
 					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble				
 					shakeTime = 5;
-					shake = true;		
-					_proj[i]->bounced = true;
+					shake = true;	
 					meuble[j]->life -= 1;
+					_proj[i]->bounced = true;					
 					SFX.setBuffer(_hit);
 					SFX.play();
 					
@@ -713,10 +714,10 @@ int main()
 				else if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer && _proj[i]->bounced)
 				{		
 					shakeTime = 5;
-					shake = true;
-					meuble[j]->life -= 1;
-					SFX.setBuffer(_exploS);
+					shake = true;					
+					SFX.setBuffer(_hit);
 					SFX.play();
+					meuble[j]->life -= 1;
 					_proj.erase(_proj.begin() + i);
 
 					if (meuble[j]->life == 0) {
@@ -731,16 +732,15 @@ int main()
 					}
 					break;
 				}
-				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3 && dmgTime == 0)
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
 				{
 
 					// P1 touché par proj
 					meuble[j]->life --;
 					_proj.erase(_proj.begin() + i);
 
-					_player = j;
-					dmgTime = 50;
-					moitie = dmgTime / 2;
+					_player = j;				
+				
 					dmg = true;
 				
 					shakeTime = 5;
@@ -749,7 +749,7 @@ int main()
 					break;
 					
 				}
-				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2 && dmgTime == 0)
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
 				{
 
 					// P2 touché par proj
@@ -758,8 +758,7 @@ int main()
 
 					_proj.erase(_proj.begin() + i);
 					_player = j;
-					dmgTime = 50;
-					moitie = dmgTime / 2;
+
 					dmg = true;
 					                            
 					shakeTime = 5;
