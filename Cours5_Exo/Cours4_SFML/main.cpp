@@ -26,7 +26,7 @@ float Xjoy0 = 0, Yjoy0 = 0, Ujoy0 = 0, Vjoy0 = 0, Zjoy0 = 0; //J1
 float Xjoy1 = 0, Yjoy1 = 0, Ujoy1 = 0, Vjoy1 = 0, Zjoy1 = 0; //J2
 
 float lastRot = 90.0f;
-float lastRot1 = 90.0f;
+float lastRot1 = -90.0f;
 
 int squareSpeed = 3;
 float JoySpeed = 0.1f, JoySpeed1 = 0.1f;
@@ -42,6 +42,7 @@ sf::Texture _empty;
 sf::Texture _explo;
 sf::Texture _sol;
 sf::Texture _mur;
+sf::Texture _color;
 sf::Sprite explo;
 float Frame = 0.f;
 int framecount = 20;
@@ -115,7 +116,7 @@ static void initChar()
 {
 #pragma region initChar1
 
-	auto rec = new Entity(initRecShape(32,32), initRecShape(32, 32), Vector2f(shPos.x = 1000, shPos.y = 400), sf::Color(0xB32481ff), nullptr, &_empty);
+	auto rec = new Entity(initRecShape(32,32), initRecShape(32, 32), Vector2f(shPos.x = 20, shPos.y = 360), sf::Color(0xB32481ff), nullptr, &_empty);
 	rec->sprite->setOrigin(16, 16);
 	rec->sprite->setOutlineColor(sf::Color::Black);
 	rec->sprite->setOutlineThickness(1);
@@ -131,7 +132,7 @@ static void initChar()
 #pragma endregion
 	
 #pragma region initChar2
-	auto rec1 = new Entity(initRecShape(32, 32), initRecShape(32, 32), Vector2f(shPos1.x = 400, shPos1.y = 400), sf::Color(0x2DADB3ff), nullptr, &_empty);
+	auto rec1 = new Entity(initRecShape(32, 32), initRecShape(32, 32), Vector2f(shPos1.x = 1200, shPos1.y = 360), sf::Color(0x2DADB3ff), nullptr, &_empty);
 	rec1->sprite->setOrigin(16, 16);
 	rec1->sprite->setOutlineColor(sf::Color::Black);
 	rec1->sprite->setOutlineThickness(1);
@@ -139,7 +140,6 @@ static void initChar()
 
 	auto canon1 = new Entity(initRecShape(12, 48), initRecShape(8, 24), Vector2f(shPos1.x, shPos1.y), sf::Color(0xFF7A14ff), nullptr, &_empty);
 	canon1->sprite->setOrigin(6,8);
-	//canon1->sprite->setRotation(90);
 	canon1->sprite->setOutlineColor(sf::Color::Black);
 	canon1->sprite->setOutlineThickness(1);
 	canon1->isCanon = true;
@@ -226,7 +226,7 @@ void launchProj(sf::RenderWindow &win, int player) {
 		Vector2f(meuble[player]->sprite->getPosition().x + cos(angle[player]) *50, 
 			meuble[player]->sprite->getPosition().y + sin(angle[player]) *50), 
 			angle[player], sf::Color::Black);
-	proj->sprite->setOrigin(2, 4);
+	//proj->sprite->setOrigin(2, 4);
 	proj->sprite->setRotation(angle[player] * 180 / 3.14159265359);
 	_proj.push_back(proj);
 }
@@ -458,10 +458,11 @@ int main()
 	if (!_explo.loadFromFile("res/Explo.png")) printf("no such file");
 	explo.setPosition(Vector2f(-200, -200));
 	explo.setTexture(_explo);
-	explo.setOrigin(40, 40);
+	explo.setOrigin(64, 64);
 
 	if (!_sol.loadFromFile("res/Desert.png")) printf("no such file");
 	if (!_mur.loadFromFile("res/StoneBrick.png")) printf("no such file");
+	if (!_color.loadFromFile("res/Couleur.png")) printf("no such file");
 	sol.setTexture(&_sol);
 
 	if (!_exploS.loadFromFile("res/Explo.wav")) printf("no sound");
@@ -488,7 +489,6 @@ int main()
 	int every = 0;	
 
 	initChar();
-	initEntities();
 	Menu();
 	
 
@@ -528,7 +528,7 @@ int main()
 					meuble[_player]->sprite->setTexture(nullptr);
 				else if (moitie != dmgTime)
 				{
-					meuble[_player]->sprite->setTexture(&_empty);
+					meuble[_player]->sprite->setTexture(&_color);
 
 				}
 
@@ -552,12 +552,12 @@ int main()
 			{
 
 			case sf::Event::JoystickMoved:
-				if (event.joystickMove.joystickId == 0){
+				if (event.joystickMove.joystickId == 0) {
 					if (event.joystickMove.axis == sf::Joystick::X)
 					{
-						Xjoy0 = event.joystickMove.position;					
+						Xjoy0 = event.joystickMove.position;
 					}
-					if (event.joystickMove.axis == sf::Joystick::Y) {												
+					if (event.joystickMove.axis == sf::Joystick::Y) {
 						Yjoy0 = event.joystickMove.position;
 					}
 					if (event.joystickMove.axis == sf::Joystick::U)
@@ -593,22 +593,30 @@ int main()
 						Zjoy1 = event.joystickMove.position;
 					}
 				}
-		
+
 				break;
 
-			case sf::Event::JoystickButtonPressed: 
+			case sf::Event::JoystickButtonPressed:
 				if (event.joystickButton.joystickId == 0)
+				{
 					if (event.joystickButton.button == 0 && _gameState == MENU)
-						_gameState = PLAYING;
-					if (event.joystickButton.button == 0 && _gameState == ENDGAME)
 					{
-						_proj.clear();
-						meuble.clear();						
+						meuble.clear();
 						initChar();
 						initEntities();
 						_gameState = PLAYING;
 					}
-
+					
+					if (event.joystickButton.button == 0 && _gameState == ENDGAME)
+					{
+					_proj.clear();
+					meuble.clear();
+					initChar();
+					initEntities();
+					_textes.clear();
+					_gameState = PLAYING;
+					}
+			}
 			case sf::Event::KeyPressed:						
 				
 				/*if (event.key.code == sf::Keyboard::Q )
@@ -662,7 +670,6 @@ int main()
 			drawMenu(window);
 			break;
 		case PLAYING:
-
 			window.draw(sol);
 			drawEntities(window);
 			Move(window);
@@ -682,18 +689,19 @@ int main()
 		{
 			_proj[i]->move();
 			for (int j = 0; j < meuble.size(); j++) {
-				if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer)
+				if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer && !_proj[i]->bounced)
 				{
 					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble				
 					shakeTime = 5;
-					shake = true;					
+					shake = true;		
+					_proj[i]->bounced = true;
 					meuble[j]->life -= 1;
 					SFX.setBuffer(_hit);
 					SFX.play();
-
+					
 					if (meuble[j]->life == 0) {										
 
-						explo.setPosition(meuble[j]->sprite->getPosition());
+						explo.setPosition(meuble[j]->sprite->getPosition().x + 20, meuble[j]->sprite->getPosition().y + 20);
 						Frame = 0;
 						meuble[j]->_destroy(window);
 						SFX.setBuffer(_exploS);
@@ -702,17 +710,27 @@ int main()
 						break;
 					}					
 				}
-				/*else if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer && _proj[i]->bounced)
-				{
-								
+				else if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer && _proj[i]->bounced)
+				{		
 					shakeTime = 5;
 					shake = true;
 					meuble[j]->life -= 1;
 					SFX.setBuffer(_exploS);
 					SFX.play();
 					_proj.erase(_proj.begin() + i);
+
+					if (meuble[j]->life == 0) {
+
+						explo.setPosition(meuble[j]->sprite->getPosition().x + 20, meuble[j]->sprite->getPosition().y + 20);
+						Frame = 0;
+						meuble[j]->_destroy(window);
+						SFX.setBuffer(_exploS);
+						SFX.play();
+						//_proj.erase(_proj.begin() + i);
+						break;
+					}
 					break;
-				}*/
+				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3 && dmgTime == 0)
 				{
 
