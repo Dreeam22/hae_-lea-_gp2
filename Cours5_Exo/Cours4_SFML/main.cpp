@@ -56,7 +56,7 @@ bool dmg = false;
 int dmgTime = 0;
 
 int _player = 0;
-
+int prevHit = 0;
 sf::Sound SFX;
 sf::SoundBuffer _hit, _exploS, _exploF;
 sf::Music _music;
@@ -472,6 +472,7 @@ int main()
 	if(!_music.openFromFile("res/Music.ogg")) printf("no music");
 	if(!_exploF.loadFromFile("res/Explo_fin.wav")) printf("no music");
 	_music.setLoop(true);
+	_music.setVolume(50.0f);
 	_music.play();
 	
 	float fps[4] = { 0.f,0.f ,0.f ,0.f };
@@ -498,15 +499,15 @@ int main()
 
 	while (window.isOpen())  // on passe tout le temps
 	{
-		sf::Event event; 
-		frameStart = clock.getElapsedTime();		
+		sf::Event event;
+		frameStart = clock.getElapsedTime();
 		window.setMouseCursorVisible(false);
 
 
 		if (every == 0)
 		{
 			//myFPScounter.setString("FPS : " + std::to_string(fps[(step - 1) % 4]));					
-		
+
 		}
 
 		if (shake) {
@@ -524,29 +525,29 @@ int main()
 		}
 
 		if (dmg)
-		{	
+		{
 			dmgTime++;
 			auto culer = meuble[_player]->sprite->getFillColor();
 			if (dmgTime % 15 == 0)
 			{
-				
+
 				culer.a == 255 ? meuble[_player]->sprite->setFillColor(sf::Color(culer.r, culer.g, culer.b, 120)) : meuble[_player]->sprite->setFillColor(sf::Color(culer.r, culer.g, culer.b, 255));
-				
-				
+
+
 			}
-			
+
 			if (dmgTime == 60) {
 				meuble[_player]->sprite->setFillColor(sf::Color(culer.r, culer.g, culer.b, 255));
 				dmgTime = 0;
 				dmg = false;
 			}
-			
+
 
 		}
-	
+
 		while (window.pollEvent(event))  //met l'évènement en premier de la queue
-		{			
-			
+		{
+
 			switch (event.type)
 			{
 
@@ -605,19 +606,19 @@ int main()
 						initEntities();
 						_gameState = PLAYING;
 					}
-					
+
 					if (event.joystickButton.button == 0 && _gameState == ENDGAME)
 					{
-					_proj.clear();
-					meuble.clear();
-					initChar();
-					initEntities();
-					_textes.clear();
-					_gameState = PLAYING;
+						_proj.clear();
+						meuble.clear();
+						initChar();
+						initEntities();
+						_textes.clear();
+						_gameState = PLAYING;
 					}
-			}
-			case sf::Event::KeyPressed:						
-				
+				}
+			case sf::Event::KeyPressed:
+
 				/*if (event.key.code == sf::Keyboard::Q )
 				{
 					shPos.x -= squareSpeed;
@@ -646,7 +647,7 @@ int main()
 				break;
 
 			case sf::Event::KeyReleased:
-				
+
 				break;
 
 			case sf::Event::Closed:
@@ -660,8 +661,8 @@ int main()
 		}
 
 		window.clear(); // nettoie la fenêtre
-		
-		
+
+
 
 		switch (_gameState)
 		{
@@ -684,7 +685,10 @@ int main()
 		}
 
 		//window.draw(myFPScounter); // on demande le dessin d'une forme		
-		
+		if (SFX.getBuffer() == &_exploS) { SFX.setVolume(20.0f); }
+		else if (SFX.getBuffer() == &_exploF) { SFX.setVolume(100.0f); }
+		else { SFX.setVolume(50.0f); }
+	
 		
 		for (int i = 0; i < _proj.size(); i++)
 		{
@@ -692,13 +696,16 @@ int main()
 			for (int j = 0; j < meuble.size(); j++) {
 				if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer && !_proj[i]->bounced)
 				{
+					prevHit = j;
 					_proj[i]->coll(meuble[j]); // Rebond proj sur meuble				
 					shakeTime = 5;
 					shake = true;	
 					meuble[j]->life -= 1;
-					_proj[i]->bounced = true;					
+					_proj[i]->bounced = true;	
+					
 					SFX.setBuffer(_hit);
 					SFX.play();
+					
 					
 					if (meuble[j]->life == 0) {										
 
@@ -712,14 +719,22 @@ int main()
 					}					
 				}
 				else if (meuble[j]->box.intersects(_proj[i]->box) && !meuble[j]->isPlayer && _proj[i]->bounced)
-				{		
-					shakeTime = 5;
-					shake = true;					
-					SFX.setBuffer(_hit);
-					SFX.play();
-					meuble[j]->life -= 1;
-					_proj.erase(_proj.begin() + i);
+				{	
+					if (j == prevHit)
+					{
+						_proj[i]->coll(meuble[j]);
+					}
+					else
+					{
+						shakeTime = 5;
+						shake = true;
+						SFX.setBuffer(_hit);
+						SFX.play();
+						meuble[j]->life -= 1;
+						_proj.erase(_proj.begin() + i);
+					}
 
+					
 					if (meuble[j]->life == 0) {
 
 						explo.setPosition(meuble[j]->sprite->getPosition().x + 20, meuble[j]->sprite->getPosition().y + 20);
@@ -732,7 +747,7 @@ int main()
 					}
 					break;
 				}
-				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3)
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 3 && !dmg)
 				{
 
 					// P1 touché par proj
@@ -749,7 +764,7 @@ int main()
 					break;
 					
 				}
-				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2)
+				else if (meuble[j]->box.intersects(_proj[i]->box) && meuble[j]->isCanon && j != 2 && !dmg)
 				{
 
 					// P2 touché par proj
